@@ -32,6 +32,17 @@ Follow these instructions to get started:
         DB_URI=<your-mongodb-database-uri-here>
     ```
 
+## Development and Testing
+
+### Development 
+
+#### Helpful Resources
+I had previously dipped my toe into the world of development with NoSQL databases and drivers, but this project was the **first time** that I found myself *completely submerged* in the process of spinning up a NoSQL database layer. In case anyone reading this is going through that experience now, here are the resources I used for setting up a local mongodb development server:
+
+1. [Documentation for MongoDB Extension of Jest](https://jestjs.io/docs/en/mongodb)
+2. [Installing MongoDB on Mac (Catalina and non-Catalina)](https://zellwk.com/blog/install-mongodb/)
+3. [How to setup a local MongoDB connection](https://zellwk.com/blog/local-mongodb/)
+
 
 ## Routes
 
