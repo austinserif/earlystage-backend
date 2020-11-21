@@ -36,6 +36,7 @@ class User {
         }
 
         finally {
+            //close database connection
             await db.close();
         }
     }
