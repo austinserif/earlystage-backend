@@ -43,7 +43,6 @@ I had previously dipped my toe into the world of development with NoSQL database
 2. [Installing MongoDB on Mac (Catalina and non-Catalina)](https://zellwk.com/blog/install-mongodb/)
 3. [How to setup a local MongoDB connection](https://zellwk.com/blog/local-mongodb/)
 
-
 ## Routes
 
 #### Users
