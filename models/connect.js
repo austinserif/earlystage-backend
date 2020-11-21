@@ -26,8 +26,7 @@ const connect = (dbName) => {
         return db;
 
     } catch (err) {
-        //read msg to console
-        console.error(err);
+        console.log(err);
 
         //close client connection
         client.close();
