@@ -22,8 +22,7 @@ Follow these instructions to get started:
 
 5. Edit your `.env` to contain the following variables:
     - Choose a work factor for bcrypt: `echo "BCRYPT_WORK_FACTOR=12" >> .env`
-    For more information on work factors, see this [great article](https://auth0.com/blog/hashing-in-action-understanding-bcrypt/) by Dan Arias at authO. Additionally, you can check out [bcrypt's own documentation](https://www.npmjs.com/package/bcrypt]) for Node.jz.
-    -  `echo "DB_URI=<your-database-uri-here>" >> .env`    
+    For more information on work factors, see this [great article](https://auth0.com/blog/hashing-in-action-understanding-bcrypt/) by Dan Arias at authO. Additionally, you can check out [bcrypt's own documentation](https://www.npmjs.com/package/bcrypt]) for Node.js.
     - MongoDB URI: `echo "DB_URI=<your-database-uri-here>" >> .env`
 
 
@@ -38,7 +37,6 @@ Follow these instructions to get started:
 
 #### Users
 1. GET `/users/:id`
-
 2. POST `/users/:id`
 3. UPDATE `/users/:id`
 4. DELETE `/users/:id`
