@@ -1,42 +1,19 @@
 /** Contains logic for creating instance of mongodb connection */
 const { MongoClient } = require('mongodb');
-const { DB_URI } = require('../config');
-const ExpressError = require('../helpers/ExpressError');
+const { DB_URI, DB_NAME } = require('../config');
 
-/** 
- * Attempts to establish connection with database cluster and returns
- * a connected database instance if successful. 
- * 
- * @param { String } dbName
- * 
- * @returns { MongoClient } 
- */
-const connect = (dbName) => {
+let db
 
-    //create a new database cluster client instance
-    const client = new MongoClient(DB_URI, { useNewUrlParser: true });
-    try {
-        //connect to database cluster
-        await client.connect();
+MongoClient.connect(url, { useNewUrlParser: true }, (err, client) => {
+  if (err) return console.log(err)
 
-        //establish connection with specific database by name
-        const db = client.db(dbName);
+  // Storing a reference to the database so you can use it later
+  db = client.db(DB_NAME)
+  console.log(`Connected MongoDB: ${url}`)
+  console.log(`Database: ${dbName}`)
+});
 
-        //return database client instance 
-        return db;
-
-    } catch (err) {
-        console.log(err);
-
-        //close client connection
-        client.close();
-
-        //throw internal error
-        throw new ExpressError('There was an error connecting with the server', 500);
-    }
-}
-
-module.exports = connect;
+module.exports = db;
 
 
 
