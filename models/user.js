@@ -1,6 +1,7 @@
-/** import connect function to establish db instance */
-const connect = require('./connect');
+/** import db instance */
+const db = require('./connect');
 
+/** collection name constant */
 const COLLECTION = "users";
 
 /**
@@ -19,11 +20,14 @@ class User {
      * @param { String } user.password
      * 
      */
+
     static async create ({ name, email, password }) {
         try {
             //hash password
+            const hashedPassword = await User.hashPassword(password);
 
             //create resource in database
+            
 
             //throw specific error if resource already exists
 
@@ -48,4 +52,20 @@ class User {
     static async update (id, user) {}
 
     static async delete (id) {}
+
+     
+    /** Take password string and return new hashed password
+     * 
+     * @param {String} password - password string
+     * 
+     * @returns {String} - hashed password string
+     * 
+     */
+    static async hashPassword(password) {
+        const salt = await bcrypt.genSalt(Number(BCRYPT_WORK_FACTOR));
+        const hashed = await bcrypt.hash(password, salt);
+        return hashed;
+    }
 }
+
+module.exports = User;
