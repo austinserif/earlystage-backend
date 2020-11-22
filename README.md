@@ -43,6 +43,12 @@ I had previously dipped my toe into the world of development with NoSQL database
 2. [Installing MongoDB on Mac (Catalina and non-Catalina)](https://zellwk.com/blog/install-mongodb/)
 3. [How to setup a local MongoDB connection](https://zellwk.com/blog/local-mongodb/)
 
+#### Input Sanitation with MongoDB
+This is another message for those coming from SQL databases primarily. Unlike many SQL drivers that execute instructions and data from a single string (and thus require input sanitation), most of the time MongoDB inputs do not need to be sanitized on insert. However there are some instances in which reading data and then executing it could make your database vulnerable to attack. Here are some resources:
+
+1. [A VERY lightweight library for sanitizing mongodb inputs](https://www.npmjs.com/package/mongo-sanitize)
+2. [Useful Stackoverflow Article](https://stackoverflow.com/questions/30585213/do-i-need-to-sanitize-user-input-before-inserting-in-mongodb-mongodbnode-js-co)
+
 ## Routes
 
 #### Users
