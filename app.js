@@ -1,5 +1,4 @@
 /** app.js file for earlystage due diligence */
-
 const express = require("express");
 
 const ExpressError = require("./helpers/expressError");
@@ -14,10 +13,12 @@ app.use(express.urlencoded({extended: true}));
 app.use(morgan("tiny"));
 
 
-//include abstracted routes here
+//include abstracçted routes here
+const users = require('./routes/users');
 
 
 //"use" those routes here
+app.use('/users', users);
 
 
 /** 404 handler */
