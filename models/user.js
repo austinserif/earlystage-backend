@@ -1,6 +1,8 @@
 /** import db instance */
 const db = require('./connect');
 
+const ExpressError = require('../helpers/ExpressError');
+
 /** collection name constant */
 const COLLECTION = "users";
 
@@ -13,36 +15,45 @@ class User {
      * Creates a new user resource in database
      * if one does not already exist with the same 
      * email based id hash.
+     *
      * 
      * @param { Object } user
      * @param { String } user.name
      * @param { String } user.email
      * @param { String } user.password
      * 
+     * NOTE: Should return an `ExpressError` with 409 status code if email already in use.
      */
 
-    static async create ({ name, email, password }) {
+    static async createNewUser ({ name, email, password }) {
         try {
+            // check if email already exists in the database
+            if (!db.users.findOne({ email: { $eq: email}})) {
+                throw new ExpressError('The email you chose is already in use', 409);
+            }
+
             //hash password
-            const hashedPassword = await User.hashPassword(password);
+            const hashedPassword = User.hashPassword(password);
 
             //create resource in database
-            
-
-            //throw specific error if resource already exists
+            const result = await db.users.insert({
+                name,
+                email,
+                password: hashedPassword
+            });
 
             //return new user object if successful
+            return result;
 
         } catch (err) {
-            //throw general error
-
-            //throw resource duplicate error
+            //throw error if necessary
+            throw new ExpressError(err.message, err.status);
         }
 
-        finally {
-            //close database connection
-            await db.close();
-        }
+        // finally {
+        //     //close database connection
+        //     await db.close();
+        // }
     }
 
     /**  */
