@@ -3,6 +3,7 @@ const getConnection = require('./connect');
 const bcrypt = require('bcrypt');
 const { BCRYPT_WORK_FACTOR } = require('../config');
 const ExpressError = require('../helpers/ExpressError');
+const createUserDocument = require('../helpers/createUserDocument');
 
 /** collection name constant */
 const COLLECTION = "users";
@@ -13,25 +14,46 @@ const COLLECTION = "users";
  */
 class User {
 
+    /** Find and returns an array of all user objects
+     * currently in database
+    */
     static async getAllUsers() {
         try {
+            //establish connection with db server
             const db = await getConnection();
+
+            //retrieve CURSOR OBJECT containing pointers to all users from database
             const result = db.collection('users').find({});
+
+            //get object array from cursor
             const resultArray = await result.toArray();
+
+            //if no users, throw 404
+            if (!resultArray.length) throw new ExpressError('There are no users in the database', 404);
+
+            //return array
             return resultArray;
         } catch(err) {
-            throw new Error();
+            //throw express error
+            throw new ExpressError(err.message, err.status || 500);
         }
     }
 
+    /** pass in an email and get back corresponding user object if exists, otherwise
+     *  return null
+     */
     static async getUserByEmail(email) {
         try {
+            //establish connection with db server
             const db = await getConnection();
-            const result = await db.collection('users').findOne({ email: { $eq: email}});
 
+            //retrieve resource 
+            const result = await db.collection('users').findOne({ email: { $eq: email} });
+
+            //return result object
             return result;
         } catch(err) {
-            throw new Error();
+            throw new ExpressError(err.message, err.status || 500);
         }
     }
 
@@ -64,13 +86,19 @@ class User {
             //hash password
             const hashedPassword = await User.hashPassword(password);
 
-            //
-            const { ops } = await db.collection('users').insertOne({name, email, password: hashedPassword});
+            /** place into full userobject schema */
+            const fullSchema = createUserDocument({name, email, password: hashedPassword});
 
-            const result = ops[0];
+            //destructure ops array from result object
+            const { ops } = await db.collection('users').insertOne(fullSchema);
 
+            // get first item from array (should be just one item in there anyways!)
+            const [ result ] = ops;
+
+            //remove password hash from result object
             delete result.password;
-            //if here return the result
+
+            //return result
             return result;
 
         } catch (err) {
@@ -79,22 +107,59 @@ class User {
         }
     }
 
-    /**  */
-    static async update (email, user) {
+    /** 
+     * Accepts an email and modifiedAccount params and replaces the 
+     * previous name and password in
+     */
+    static async updateName (email, modifiedName) {
         try {
+            //establish connection with db server
             const db = await getConnection();
 
-            const usr = await db.collection('users').findOneAndUpdate({ email: { $eq: email} });
+            const result = await db.collection('users').updateOne(
+                {email},
+                {
+                    $set: {'account.name': modifiedName, 'metadata.lastModified': new Date()}
+                }
+            );
 
+            const { matchedCount, modifiedCount } = result;
 
+            if ( !matchedCount || !modifiedCount ) {
+                throw new ExpressError('resource either could not be found, or could not be updated, or both', 404)
+            }
 
-            
+            return result;
+
         } catch(err) {
-            throw new Error();
+            throw new ExpressError(err.message, err.status || 500);
         }
     }
+    /** requires email, and password params, and deletes associated 
+     * resource from database if credentials are validated. Should help to prevent 
+     * accidental account deletion as well as accidental
+     */
+    static async delete (email, password) {
+        try {
+            //establish connection
+            const db = await getConnection();
 
-    static async delete (id) {}
+            //destructure ops array from collection result object
+            const user = await User.getUserByEmail(email);
+
+            console.log(user);
+
+            if (await bcrypt.compare(password, user.account.password)) {
+                const result = await db.collection('users').deleteOne({ email: { $eq: email} });
+                console.log(result);
+                return result;
+            }
+
+            throw new ExpressError('Unauthorized, please try again', 401);
+        } catch(err) {
+            throw new ExpressError(err.message, err.status || 500);
+        }
+    }
 
      
     /** Take password string and return new hashed password
