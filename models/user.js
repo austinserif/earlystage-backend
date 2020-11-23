@@ -54,9 +54,12 @@ class User {
             //retrieve resource 
             const result = await db.collection('users').findOne({ email: { $eq: email} });
 
+            client.close();
+
             //return result object
             return result;
         } catch(err) {
+            if (client) client.close();
             throw new ExpressError(err.message, err.status || 500);
         }
     }
@@ -100,13 +103,16 @@ class User {
             const [ result ] = ops;
 
             //remove password hash from result object
-            delete result.password;
+            delete result.account.password;
+
+            client.close();
 
             //return result
             return result;
 
         } catch (err) {
             //throw error if necessary
+            if (client) client.close();
             throw new ExpressError(err.message, err.status);
         }
     }
@@ -133,9 +139,12 @@ class User {
                 throw new ExpressError('resource either could not be found, or could not be updated, or both', 404)
             }
 
+            client.close();
+
             return result;
 
         } catch(err) {
+            if (client) client.close();
             throw new ExpressError(err.message, err.status || 500);
         }
     }
@@ -155,12 +164,13 @@ class User {
 
             if (await bcrypt.compare(password, user.account.password)) {
                 const result = await db.collection('users').deleteOne({ email: { $eq: email} });
-                console.log(result);
+                client.close();
                 return result;
             }
 
             throw new ExpressError('Unauthorized, please try again', 401);
         } catch(err) {
+            if (client) client.close();
             throw new ExpressError(err.message, err.status || 500);
         }
     }
