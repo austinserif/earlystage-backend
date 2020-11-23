@@ -90,9 +90,36 @@ router.post('/', async function(request, response, next) {
     }
 });
 
-module.exports = router;
 
 /**
- * UPDATE /users/:id
+ * UPDATE /users/:email
  * access: ceratin user only
 */
+router.patch('/:email', async function(request, response, next) {
+    try {
+        const { email } = request.params;
+        const { nameChange } = request.body;
+        const decodedEmail = decodeURIComponent(email);
+        const user = await User.updateName(decodedEmail, nameChange);
+        return response.json(user);
+    } catch(err) {
+        return next(err);
+    }
+});
+
+router.delete('/:email', async function(request, response, next) {
+    try {
+        const { email } = request.params;
+        const decodedEmail = decodeURIComponent(email);
+        const { password } = request.body;
+        const isDeleted = await User.delete(decodedEmail, password);
+        return response.json(isDeleted);
+    } catch(err) {
+        return next(err);
+    }
+});
+
+
+
+
+module.exports = router;
