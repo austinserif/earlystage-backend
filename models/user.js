@@ -20,10 +20,10 @@ class User {
     static async getAllUsers() {
         try {
             //establish connection with db server
-            const db = await getConnection();
+            const [ db, client ] = await getConnection();
 
             //retrieve CURSOR OBJECT containing pointers to all users from database
-            const result = db.collection('users').find({});
+            const result = await db.collection('users').find({});
 
             //get object array from cursor
             const resultArray = await result.toArray();
@@ -31,10 +31,14 @@ class User {
             //if no users, throw 404
             if (!resultArray.length) throw new ExpressError('There are no users in the database', 404);
 
+            //close database connection
+            client.close();
+
             //return array
             return resultArray;
         } catch(err) {
             //throw express error
+            if (client) client.close();
             throw new ExpressError(err.message, err.status || 500);
         }
     }
@@ -45,7 +49,7 @@ class User {
     static async getUserByEmail(email) {
         try {
             //establish connection with db server
-            const db = await getConnection();
+            const [ db, client ] = await getConnection();
 
             //retrieve resource 
             const result = await db.collection('users').findOne({ email: { $eq: email} });
@@ -75,7 +79,7 @@ class User {
     static async createNewUser ({ name, email, password }) {
         try {
             //establish connection
-            const db = await getConnection();
+            const [ db, client ] = await getConnection();
 
             //derive boolean from result
             const alreadyInUse = !!(await User.getUserByEmail(email));
@@ -114,7 +118,7 @@ class User {
     static async updateName (email, modifiedName) {
         try {
             //establish connection with db server
-            const db = await getConnection();
+            const [ db, client ] = await getConnection();
 
             const result = await db.collection('users').updateOne(
                 {email},
@@ -142,7 +146,7 @@ class User {
     static async delete (email, password) {
         try {
             //establish connection
-            const db = await getConnection();
+            const [ db, client ] = await getConnection();
 
             //destructure ops array from collection result object
             const user = await User.getUserByEmail(email);

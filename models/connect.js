@@ -17,7 +17,7 @@ const getConnection = async () => {
     //establish connection with specific database by name
     const db = client.db(DB_NAME);
 
-    return db;
+    return [ db, client ];
 
   } catch (err) {
     //read msg to console
