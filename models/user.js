@@ -1,6 +1,7 @@
 /** import db instance */
-const db = require('./connect');
-
+const getConnection = require('./connect');
+const bcrypt = require('bcrypt');
+const { BCRYPT_WORK_FACTOR } = require('../config');
 const ExpressError = require('../helpers/ExpressError');
 
 /** collection name constant */
@@ -11,6 +12,30 @@ const COLLECTION = "users";
  * database resources that pertain to users.
  */
 class User {
+
+    static async getAllUsers() {
+        try {
+            const db = await getConnection();
+            const result = db.collection('users').find({});
+            const resultArray = await result.toArray();
+            return resultArray;
+        } catch(err) {
+            throw new Error();
+        }
+    }
+
+    static async getUserByEmail(email) {
+        try {
+            const db = await getConnection();
+            const result = await db.collection('users').findOne({ email: { $eq: email}});
+
+            return result;
+        } catch(err) {
+            throw new Error();
+        }
+    }
+
+
     /** 
      * Creates a new user resource in database
      * if one does not already exist with the same 
@@ -27,40 +52,47 @@ class User {
 
     static async createNewUser ({ name, email, password }) {
         try {
-            // check if email already exists in the database
-            if (!db.users.findOne({ email: { $eq: email}})) {
-                throw new ExpressError('The email you chose is already in use', 409);
-            }
+            //establish connection
+            const db = await getConnection();
 
+            //derive boolean from result
+            const alreadyInUse = !!(await User.getUserByEmail(email));
+
+            //throw error if true (that there is already a user with that email)
+            if (alreadyInUse) throw new ExpressError('The email you chose is already in use', 409);
+            
             //hash password
-            const hashedPassword = User.hashPassword(password);
+            const hashedPassword = await User.hashPassword(password);
 
-            //create resource in database
-            const result = await db.users.insert({
-                name,
-                email,
-                password: hashedPassword
-            });
+            //
+            const { ops } = await db.collection('users').insertOne({name, email, password: hashedPassword});
 
-            //return new user object if successful
+            const result = ops[0];
+
+            delete result.password;
+            //if here return the result
             return result;
 
         } catch (err) {
             //throw error if necessary
             throw new ExpressError(err.message, err.status);
         }
-
-        // finally {
-        //     //close database connection
-        //     await db.close();
-        // }
     }
 
     /**  */
-    static async read (id) {}
+    static async update (email, user) {
+        try {
+            const db = await getConnection();
 
-    /**  */
-    static async update (id, user) {}
+            const usr = await db.collection('users').findOneAndUpdate({ email: { $eq: email} });
+
+
+
+            
+        } catch(err) {
+            throw new Error();
+        }
+    }
 
     static async delete (id) {}
 
@@ -68,8 +100,6 @@ class User {
     /** Take password string and return new hashed password
      * 
      * @param {String} password - password string
-     * 
-     * @returns {String} - hashed password string
      * 
      */
     static async hashPassword(password) {
