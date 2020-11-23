@@ -36,7 +36,7 @@ router.get('/:email', async function(request, response, next) {
         const { email } = request.params;
         const decodedEmail = decodeURIComponent(email);
         const user = await User.getUserByEmail(decodedEmail);
-        return response.json(user);
+        return response.json(user).status(201);
     } catch(err) {
         return next(err);
     }
