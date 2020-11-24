@@ -36,8 +36,7 @@ describe('createNewUser', function() {
         const { lastModified, createdDate } = results.metadata;
 
         //destructure name, and email for tests
-        const { name } = results.account;
-
+        const { name, isVerified } = results.account;
         const { email } = results;
 
         //test to see if correct keys are returned
@@ -49,12 +48,13 @@ describe('createNewUser', function() {
         //test that lastModified and createdDate are the same
         expect(lastModified === createdDate).toEqual(true);
 
-        //test that name and email fields are as expected
+        //test that name, email, and isVerified fields are as expected
         expect(name).toEqual(newTestUser.name);
         expect(email).toEqual(newTestUser.email);
+        expect(isVerified).toEqual(false);
     });
 
-})
+});
 
 afterAll(async function() {
     const [ db, client ] = await getConnection();
