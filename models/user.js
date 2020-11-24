@@ -1,9 +1,10 @@
 /** import db instance */
 const getConnection = require('./connect');
 const bcrypt = require('bcrypt');
-const { BCRYPT_WORK_FACTOR } = require('../config');
+const { BCRYPT_WORK_FACTOR, SECRET_KEY } = require('../config');
 const ExpressError = require('../helpers/ExpressError');
 const createUserDocument = require('../helpers/createUserDocument');
+const jwt = require('jsonwebtoken');
 
 /** collection name constant */
 const COLLECTION = "users";
@@ -80,9 +81,10 @@ class User {
      */
 
     static async createNewUser ({ name, email, password }) {
+        const [ db, client ] = await getConnection();
         try {
             //establish connection
-            const [ db, client ] = await getConnection();
+            
 
             //derive boolean from result
             const alreadyInUse = !!(await User.getUserByEmail(email));
@@ -105,15 +107,19 @@ class User {
             //remove password hash from result object
             delete result.account.password;
 
-            client.close();
+            //
+            // client.close();
 
             //return result
             return result;
 
         } catch (err) {
             //throw error if necessary
-            if (client) client.close();
             throw new ExpressError(err.message, err.status);
+        }
+
+        finally {
+            client.close();
         }
     }
 
@@ -170,8 +176,33 @@ class User {
 
             throw new ExpressError('Unauthorized, please try again', 401);
         } catch(err) {
-            if (client) client.close();
             throw new ExpressError(err.message, err.status || 500);
+        }
+    }
+
+    /** Takes an object containing username and password. If credentials match a user in database, return a token
+     * 
+     * @param {Object} credentials - object containing username and password
+     * @param {String} credentials.email - unique user identifier string
+     * @param {String} credentials.password - plain text password to compare
+     * 
+     * @returns {Promise {Object} } - object containing token
+     */
+    static async login({email, password}) {
+        try {
+            const user = await User.getUserByEmail(email);
+            const { _id, account } = user;
+            const { name, isVerified } = account;
+            if (user) {
+                if (await bcrypt.compare(password, user.account.password)) {
+                    const token = jwt.sign({ email, _id, isVerified, name }, SECRET_KEY);
+                    return { token };
+                }
+            }
+
+            throw new ExpressError('Invalid username or password', 401);   
+        } catch(err) {
+            throw(err);
         }
     }
 
