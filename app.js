@@ -15,16 +15,17 @@ app.use(morgan("tiny"));
 
 //include abstracçted routes here
 const users = require('./routes/users');
+const auth = require('./routes/auth');
 
 
 //"use" those routes here
+app.use('/login', auth);
 app.use('/users', users);
 
 
 /** 404 handler */
 app.use(function(request, response, next) {
   const err = new ExpressError("Not Found", 404);
-
   // pass the error to the next piece of middleware
   return next(err);
 });
