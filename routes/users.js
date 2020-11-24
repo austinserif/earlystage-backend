@@ -109,7 +109,10 @@ router.patch('/:email', async function(request, response, next) {
 
 router.delete('/:email', async function(request, response, next) {
     try {
+        //get email from url params
         const { email } = request.params;
+
+        //decode email
         const decodedEmail = decodeURIComponent(email);
         const { password } = request.body;
         const isDeleted = await User.delete(decodedEmail, password);
