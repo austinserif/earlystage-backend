@@ -9,7 +9,8 @@ const createUserDocument = ({ name, email, password }) => {
         email,
         account: {
             name,
-            password
+            password,
+            isVerified: false
         },
         workspaces: {},
         questions: {},
