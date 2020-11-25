@@ -5,6 +5,7 @@ const { BCRYPT_WORK_FACTOR, SECRET_KEY } = require('../config');
 const ExpressError = require('../helpers/ExpressError');
 const createUserDocument = require('../helpers/createUserDocument');
 const jwt = require('jsonwebtoken');
+const generateVerificationCode = require('../helpers/generateVerificationCode');
 
 /** collection name constant */
 const COLLECTION = "users";
@@ -81,22 +82,28 @@ class User {
      */
 
     static async createNewUser ({ name, email, password }) {
-        const [ db, client ] = await getConnection();
-        try {
-            //establish connection
-            
 
+        //establish connection
+        const [ db, client ] = await getConnection();
+        
+        try {
             //derive boolean from result
             const alreadyInUse = !!(await User.getUserByEmail(email));
 
             //throw error if true (that there is already a user with that email)
             if (alreadyInUse) throw new ExpressError('The email you chose is already in use', 409);
             
+            //generate verification code
+            const verificationCode = generateVerificationCode();
+
             //hash password
             const hashedPassword = await User.hashPassword(password);
 
+            //hash verification code
+            const hashedVerificationCode = await User.hashPassword(String(verificationCode));
+
             /** place into full userobject schema */
-            const fullSchema = createUserDocument({name, email, password: hashedPassword});
+            const fullSchema = createUserDocument({name, email, password: hashedPassword, isAdmin: false, verificationCode: hashedVerificationCode});
 
             //destructure ops array from result object
             const { ops } = await db.collection('users').insertOne(fullSchema);
@@ -104,11 +111,15 @@ class User {
             // get first item from array (should be just one item in there anyways!)
             const [ result ] = ops;
 
-            //remove password hash from result object
+            //remove unnecessary or private details from result object
             delete result.account.password;
 
-            //
-            // client.close();
+            //replace hash with plain text verification code just for one response
+            result.account.verificationCode = verificationCode;
+
+            delete result.metadata;
+            delete result.workspaces;
+            delete result.questions;
 
             //return result
             return result;
@@ -180,7 +191,7 @@ class User {
         }
     }
 
-    /** Takes an object containing username and password. If credentials match a user in database, return a token
+    /** Takes an object containing email and password. If credentials match a user in database, return a token
      * 
      * @param {Object} credentials - object containing username and password
      * @param {String} credentials.email - unique user identifier string
@@ -203,6 +214,47 @@ class User {
             throw new ExpressError('Invalid username or password', 401);   
         } catch(err) {
             throw(err);
+        }
+    }
+
+
+    /** 
+     * Given an email and verification code, verify the users account or throw error
+     * 
+    */
+    static async verifyAccount(email, code) {
+        try {
+
+            // get user object by email
+            const user = await User.getUserByEmail(email);
+
+            //if no user found through Not Found error
+            if (!user) throw new ExpressError('No user found for this email', 404);
+
+            // compare input code against hashed version in database
+            if (await bcrypt.compare(code, user.account.verificationCode)) {
+                // if matched, verify account
+
+                //get database connection
+                const [ db, client ] = await getConnection();
+
+                //verify user
+                const result = await db.collection('users').updateOne(
+                    { email: { $eq: email } },
+                    { $set: { 'account.isVerified': true, 'metadata.lastModified': new Date() } }
+                );
+
+                //close connection
+                client.close();
+
+                //return result
+                return result;
+            }
+
+            throw new ExpressError('Incorrect code, account not verified', 401)
+
+        } catch (err) {
+            throw new ExpressError(err.message, err.status || 500)
         }
     }
 
