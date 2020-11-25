@@ -3,14 +3,16 @@
  * a json schema that includes other necessary fields for later on in 
  * the userflow
  */
-const createUserDocument = ({ name, email, password }) => {
+const createUserDocument = ({ name, email, password, isAdmin, verificationCode }) => {
     const now = new Date();
     return {
         email,
         account: {
             name,
             password,
-            isVerified: false
+            isVerified: false,
+            verificationCode,
+            isAdmin,
         },
         workspaces: {},
         questions: {},
