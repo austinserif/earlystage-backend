@@ -135,34 +135,36 @@ class User {
     }
 
     /** 
-     * Accepts an email and modifiedAccount params and replaces the 
-     * previous name and password in
+     * Accepts an email and updates array as args
      */
-    static async updateName (email, modifiedName) {
+    static async update (email, updates) {
+        const [ db, client ] = await getConnection();
         try {
-            //establish connection with db server
-            const [ db, client ] = await getConnection();
+            const updatesObj = {};
+
+            updates.forEach(o => (updatesObj[o.field] = o.value));
 
             const result = await db.collection('users').updateOne(
                 {email},
                 {
-                    $set: {'account.name': modifiedName, 'metadata.lastModified': new Date()}
+                    $set: {...updatesObj, 'metadata.lastModified': new Date()}
                 }
             );
 
             const { matchedCount, modifiedCount } = result;
 
             if ( !matchedCount || !modifiedCount ) {
-                throw new ExpressError('resource either could not be found, or could not be updated, or both', 404)
+                throw new ExpressError('Resource either could not be found, or could not be updated, or both', 404)
             }
-
-            client.close();
-
+            
             return result;
 
         } catch(err) {
-            if (client) client.close();
             throw new ExpressError(err.message, err.status || 500);
+        }
+
+        finally {
+            client.close();
         }
     }
     /** requires email, and password params, and deletes associated 
