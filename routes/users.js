@@ -5,7 +5,7 @@ const ExpressError = require('../helpers/expressError');
 const router = express.Router();
 const User = require('../models/user');
 const jsonschema = require('jsonschema');
-// const userSchema = require('../schema/user-schema.json');
+const { validateNewUser } = require('../middleware/schema-validation');
 const bcrypt = require('bcrypt');
 const { BCRYPT_WORK_FACTOR } = require('../config');
 const { authorizeCertainUser, authorizeAdmin } = require('../middleware/route-protection');
@@ -15,7 +15,7 @@ const { authorizeCertainUser, authorizeAdmin } = require('../middleware/route-pr
  * GET /users
  * access: admin only
  */
-router.get('/', async function(request, response, next) {
+router.get('/', authorizeAdmin, async function(request, response, next) {
     try {
         const result = await User.getAllUsers(); //pass params, will be read by user.get() as an options obj and destructured within function.
         return response.json(result);
@@ -30,50 +30,23 @@ router.get('/', async function(request, response, next) {
  * GET /users/:email
  * access: certain user only
 */
-router.get('/:email', async function(request, response, next) {
+router.get('/:email', authorizeCertainUser, async function(request, response, next) {
     try {
         //get userEmail from request params object
         const { email } = request.params;
         const decodedEmail = decodeURIComponent(email);
         const user = await User.getUserByEmail(decodedEmail);
-        return response.json(user).status(201);
+        return response.json(user);
     } catch(err) {
         return next(err);
     }
 });
 
 /** 
- * 
- * 
- * 
- * 
- * 
- * {
-    "newUser": {
-        "result": {
-            "ok": 1,
-            "n": 1
-        },
-        "ops": [
-            {
-                "name": "Austin",
-                "email": "aserif@me.com",
-                "password": {},
-                "_id": "5fbb33dcfd52a72383f3285f"
-            }
-        ],
-        "insertedCount": 1,
-        "insertedIds": {
-            "0": "5fbb33dcfd52a72383f3285f"
-        }
-    }
-}
-
-
  * POST /users
  * access: anyone
 */
-router.post('/', async function(request, response, next) {
+router.post('/', validateNewUser, async function(request, response, next) {
     try {
         //get user object from request.body
         const { name, email, password } = request.body;
@@ -84,7 +57,7 @@ router.post('/', async function(request, response, next) {
         const newUser = await User.createNewUser({ name, email, password });
 
         //return response
-        return response.json(newUser);
+        return response.json(newUser).status(201);
     } catch(err) {
         return next(err);
     }
@@ -95,7 +68,7 @@ router.post('/', async function(request, response, next) {
  * UPDATE /users/:email
  * access: ceratin user only
 */
-router.patch('/:email', async function(request, response, next) {
+router.patch('/:email', authorizeCertainUser, async function(request, response, next) {
     try {
         const { email } = request.params;
         const { nameChange } = request.body;
@@ -107,7 +80,7 @@ router.patch('/:email', async function(request, response, next) {
     }
 });
 
-router.delete('/:email', async function(request, response, next) {
+router.delete('/:email', authorizeCertainUser, async function(request, response, next) {
     try {
         //get email from url params
         const { email } = request.params;
