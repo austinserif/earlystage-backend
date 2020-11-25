@@ -6,22 +6,24 @@ const ExpressError = require("./helpers/expressError");
 const morgan = require("morgan");
 
 const app = express();
+
+const { authenticate } = require('./middleware/route-protection');
+
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
-// add logging system
+// logging system
 app.use(morgan("tiny"));
 
+app.use(authenticate);
 
 //include abstracçted routes here
 const users = require('./routes/users');
 const auth = require('./routes/auth');
 
-
 //"use" those routes here
 app.use('/login', auth);
 app.use('/users', users);
-
 
 /** 404 handler */
 app.use(function(request, response, next) {
