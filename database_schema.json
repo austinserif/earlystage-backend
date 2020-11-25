@@ -1,61 +1,19 @@
 {
     "users": {
-        "is_admin": "boolean",
-        "user_id": {
-            "account": {
-                "name": "string",
-                "email": "string",
-                "password": "string",
-                "isVerified": "boolean",
-                "metadata": {
-                    "dates": {
-                        "date_created": "datetime",
-                        "latest_login": "datetime"
-                    }
-                }
-            },
-            "preferences":{},
-            "questions":{},
-            "workspaces": {
-                "questions": {
-                    "question_id": "string"
-                },
-                "components": {
-                    "component_id": "string",
-                    "question_id": "string"
-                }
-            }
-        }
-    },
-    "questions": {
-        "question_id": {
-            "question_string": "string",
-            "answer_format": "string",
-            "is_preset": "boolean"
-        }
-    },
-    "citations": {
-        "citation_id": {
-            "citation_string": "string",
-            "citation_type": "string"
-        }
-    },
-    "blogs": {
-        "blog_id": {
-            "author": "string",
-            "title":"string",
-            "subtitle": "string",
-            "dates": {
-                "date_created": "datetime",
-                "last_update": "datetime"
-            }
-        }
-    },
-    "metadata": {
-        "logins": {
-            "login_id": "string",
-            "user_id": "string",
-            "timestamp": "datetime"
+        "_id": "string",
+        "email": "string",
+        "account": {
+            "name": "string",
+            "password": "string",
+            "isAdmin": "boolean",
+            "isVerified": "boolean",
+            "verificationCode": "string"
+        },
+        "workspaces": "Object",
+        "questions": "Object",
+        "metadata": {
+            "lastModified": "ISO",
+            "createdDate": "ISO"
         }
     }
 }
