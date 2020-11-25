@@ -24,9 +24,19 @@ router.get('/:email', authorizeCertainUser, async function(request, response, ne
     }
 });
 
+/** 
+ * POST /users/workspaces/:email
+ * 
+ * create a new workspace for a given user
+ * 
+ *  */
 router.post('/:email', authorizeCertainUser, async function(request, response, next) {
     try {
-        
+        const { email } = request.params;
+        const { workspace } = request.body;
+        const res = await Workspaces.new(email, workspace);
+    } catch(err) {
+        return next(err);
     }
 })
 
