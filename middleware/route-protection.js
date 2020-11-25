@@ -26,22 +26,39 @@ function authenticate(request, response, next) {
 
 /** Require user or raise 401 */
 function authorize(request, response, next) {
-    if (!request.user) {
-        const err = new ExpressError("Unauthorized", 401);
+    try {
+        if (!request.user) {
+            const err = new ExpressError("Unauthorized", 401);
+            return next(err);
+        } else {
+            const { isVerified } = request.user;
+            if (!isVerified) {
+                const err = new ExpressError("Unauthorized, please verify your email before logging in", 401);
+                return next(err);
+            }
+            return next();
+        }
+    } catch(err) {
         return next(err);
-    } else {
-        return next();
     }
 }
 
 /** authorize user if the user is an admin */
 function authorizeAdmin(request, response, next) {
     try {
-        if (request.user.is_admin) {
+        const { user } = request;
+
+        if (!user || !user.is_admin) {
+            const err = new ExpressError("Unauthorized, admin access only", 401);
+            return next(err);
+        }
+
+        if (user.is_admin) {
             return next();
         }
 
-        throw new ExpressError("Unauthorized, admin access only", 401);
+        const err = new ExpressError("Unauthorized, admin access only", 401);
+        return next(err);
 
     } catch(err) {
         return next(err);
@@ -52,12 +69,27 @@ function authorizeAdmin(request, response, next) {
  * otherwise throw 401 error
  */
 function authorizeCertainUser(request, response, next) {
-    try {  
-        if (request.user.username === request.params.username) {
+    try {
+
+        const { user, params } = request;
+
+        if (!user) {
+            const err = new ExpressError("Unauthorized", 401);
+            return next(err);
+        }
+
+        const { isVerified } = user;
+        if (!isVerified) {
+            const err = new ExpressError("Unauthorized, please verify your email", 401);
+            return next(err);
+        }
+
+        if (user.email === params.email) {
             return next();
         }
 
-        throw new ExpressError("Unauthorized", 401);
+        const err = new ExpressError("Unauthorized", 401);
+        return (next(err));
 
     } catch(err) {
         return next(err);
