@@ -20,4 +20,14 @@ router.post('/', async function(request, response, next) {
     }
 });
 
+router.post('/verify', async function(request, response, next) {
+    try {
+        const { email, code } = request.body;
+        const res = await User.verifyAccount(email, code);
+        return response.json(res);
+    } catch (err) {
+        return next(err);
+    }
+});
+
 module.exports = router;
