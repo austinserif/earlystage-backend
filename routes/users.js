@@ -5,11 +5,13 @@ const ExpressError = require('../helpers/expressError');
 const router = express.Router();
 const User = require('../models/user');
 const jsonschema = require('jsonschema');
-const { validateNewUser } = require('../middleware/schema-validation');
+const { validateNewUser, validateUpdatedUser } = require('../middleware/schema-validation');
 const bcrypt = require('bcrypt');
 const { BCRYPT_WORK_FACTOR } = require('../config');
 const { authorizeCertainUser, authorizeAdmin } = require('../middleware/route-protection');
+const workspaces = require('./workspaces');
 
+router.use('/workspaces', workspaces);
 
 /**
  * GET /users
@@ -65,15 +67,33 @@ router.post('/', validateNewUser, async function(request, response, next) {
 
 
 /**
- * UPDATE /users/:email
+ * PATCH /users/:email
  * access: ceratin user only
+ * 
+ * This endpoint takes a `email` as a parameter, and an `updates` array outlining the 
+ * fields and values to be updated.
+ * 
+ * `request.body.updates = [ 
+ *      { key: "accounts.isVerified", value: true },
+ *      { key: "metadata.lastModified", value: "2020-11-25T00:34:44.847Z"}
+ * ]`
+ * 
+ * 
 */
-router.patch('/:email', authorizeCertainUser, async function(request, response, next) {
+router.patch('/:email', authorizeCertainUser, validateUpdatedUser, async function(request, response, next) {
     try {
+        //get target email from params object, this email could be encoded or not
         const { email } = request.params;
-        const { nameChange } = request.body;
+
+        //retrieve updates array from request body
+        const { updates } = request.body;
+
+        //decode email
         const decodedEmail = decodeURIComponent(email);
-        const user = await User.updateName(decodedEmail, nameChange);
+        
+        //pass decoded email and updates array to the update method
+        const user = await User.update(decodedEmail, updates);
+
         return response.json(user);
     } catch(err) {
         return next(err);
