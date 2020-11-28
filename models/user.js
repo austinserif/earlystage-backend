@@ -6,6 +6,7 @@ const ExpressError = require('../helpers/ExpressError');
 const createUserDocument = require('../helpers/createUserDocument');
 const jwt = require('jsonwebtoken');
 const generateVerificationCode = require('../helpers/generateVerificationCode');
+const Email = require('../services/email');
 
 /** collection name constant */
 const COLLECTION = "users";
@@ -121,6 +122,8 @@ class User {
             delete result.workspaces;
             delete result.questions;
 
+            await User.sendVerificationEmail(email, verificationCode);
+
             //return result
             return result;
 
@@ -167,6 +170,8 @@ class User {
             client.close();
         }
     }
+
+    
     /** requires email, and password params, and deletes associated 
      * resource from database if credentials are validated. Should help to prevent 
      * accidental account deletion as well as accidental
@@ -216,6 +221,16 @@ class User {
             throw new ExpressError('Invalid username or password', 401);   
         } catch(err) {
             throw(err);
+        }
+    }
+
+    static async sendVerificationEmail(email, verificationCode) {
+        try {
+            const subject = 'Earlystage Due Diligence Email Verification'
+            const text = `Log in to your account and enter the following verification code to get started: ${verificationCode}`;
+            await Email.send(email, subject, text);
+        } catch(err) {
+            throw new ExpressError(err.message, err.status || 500);
         }
     }
 
