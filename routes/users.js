@@ -27,7 +27,6 @@ router.get('/', authorizeAdmin, async function(request, response, next) {
 });
 
 
-
 /**
  * GET /users/:email
  * access: certain user only
