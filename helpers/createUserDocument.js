@@ -14,8 +14,8 @@ const createUserDocument = ({ name, email, password, isAdmin, verificationCode }
             verificationCode,
             isAdmin,
         },
-        workspaces: {},
-        questions: {},
+        workspaces: [],
+        questions: [],
         metadata: {
             lastModified: now,
             createdDate: now
