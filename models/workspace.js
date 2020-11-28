@@ -1,4 +1,5 @@
 const getConnection = require('./connect');
+const ExpressError = require('../helpers/ExpressError');
 
 class Workspace {
 
@@ -7,13 +8,34 @@ class Workspace {
      * is not already taken
      */
     static async new(email, workspace) {
+        const checkpoints = { };
         const [ db, client ] = await getConnection();
         try {
             const { companyName, companyDomain } = workspace;
 
-            //insert new workspace in workspace collection
+            const now = new Date();
+
+            // insert new workspace in workspace collection
+            const result = await db.collection('workspaces').insertOne({ 
+                userEmail: email,
+                entity: {
+                    name: companyName,
+                    domain: companyDomain
+                },
+                components: [],
+                metadata: {
+                    lastModified: now,
+                    createdDate: now
+                }
+            });
 
             //add workspace id of new object to user's workspace array
+            const addedToUser = await db.collection('users').updateOne(
+                { email: { $eq: email } },
+                { $push: { 'workspaces': result.ops[0]._id }}
+            );
+
+            return addedToUser;
 
         } catch(err) {
             throw new ExpressError(err.message, err.status || 500)
@@ -22,4 +44,70 @@ class Workspace {
             client.close();
         }
     }
+
+    /** 
+     * Accepts an email and updates array as args
+     */
+    static async update (workspaceId, email, updates) {
+        const [ db, client ] = await getConnection();
+        try {
+
+            //will throw error if user does not match workspace id
+            const user = await Workspace.getById(workspaceId, email);
+
+            //map changes into updates object
+            const updatesObj = {};
+            updates.forEach(o => (updatesObj[o.field] = o.value));
+
+            //update workspace and get result
+            const result = await db.collection('workspaces').updateOne(
+                {_id: workspaceId},
+                {
+                    $set: {...updatesObj, 'metadata.lastModified': new Date()}
+                }
+            );
+
+            const { matchedCount, modifiedCount } = result;
+
+            if ( !matchedCount || !modifiedCount ) {
+                throw new ExpressError('Resource either could not be found, or could not be updated, or both', 404)
+            }
+            
+            return result;
+
+        } catch(err) {
+            throw new ExpressError(err.message, err.status || 500);
+        }
+
+        finally {
+            client.close();
+        }
+    }
+
+    /** takes a workspace id and email and returns object if database contains 
+     * an object corresponding to the given id that also contains an email property value
+     * matching the email argument.
+     */
+    static async getById(workspaceId, email) {
+        const [ db, client ] = await getConnection();
+        try {
+            const cursor = await db.collection('workspaces').find(workspaceId);
+            const [ result ] = await cursor.toArray();
+            const { userEmail } = result;
+
+            if (userEmail === email) {
+                return result;
+            } else {
+                throw new ExpressError('Unauthorized: you can only view your own workspaces', 401);
+            }
+        } catch(err) {
+            throw new ExpressError(err.message, err.status || 500);
+        }
+
+        finally {
+            client.close();
+        }
+    }
 }
+
+module.exports = Workspace;
