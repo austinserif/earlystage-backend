@@ -1,0 +1,96 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "http://example.com/example.json",
+    "type": "object",
+    "title": "The root schema",
+    "description": "The root schema comprises the entire JSON document.",
+    "default": {},
+    "examples": [
+        {
+            "updates": [
+                {
+                    "field": "account.name",
+                    "value": "Fake Name"
+                },
+                {
+                    "field": "metadata.lastModified",
+                    "value": "2020-11-25T00:34:44.847Z"
+                }
+            ]
+        }
+    ],
+    "required": [
+        "updates"
+    ],
+    "properties": {
+        "updates": {
+            "$id": "#/properties/updates",
+            "type": "array",
+            "title": "The updates schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": [],
+            "examples": [
+                [
+                    {
+                        "field": "account.name",
+                        "value": "Austin Serif"
+                    },
+                    {
+                        "field": "metadata.lastModified",
+                        "value": "2020-11-25T00:34:44.847Z"
+                    }
+                ]
+            ],
+            "additionalItems": true,
+            "items": {
+                "$id": "#/properties/updates/items",
+                "anyOf": [
+                    {
+                        "$id": "#/properties/updates/items/anyOf/0",
+                        "type": "object",
+                        "title": "The first anyOf schema",
+                        "description": "An explanation about the purpose of this instance.",
+                        "default": {},
+                        "examples": [
+                            {
+                                "field": "account.name",
+                                "value": "Austin Serif"
+                            }
+                        ],
+                        "required": [
+                            "field",
+                            "value"
+                        ],
+                        "properties": {
+                            "field": {
+                                "$id": "#/properties/updates/items/anyOf/0/properties/field",
+                                "type": "string",
+                                "title": "The field schema",
+                                "description": "An explanation about the purpose of this instance.",
+                                "default": "",
+                                "examples": [
+                                    "account.name"
+                                ],
+                                "enum": [
+                                    "account.name"
+                                ]
+                            },
+                            "value": {
+                                "$id": "#/properties/updates/items/anyOf/0/properties/value",
+                                "type": "string",
+                                "title": "The value schema",
+                                "description": "An explanation about the purpose of this instance.",
+                                "default": "",
+                                "examples": [
+                                    "Austin Serif"
+                                ]
+                            }
+                        },
+                        "additionalProperties": true
+                    }
+                ]
+            }
+        }
+    },
+    "additionalProperties": true
+}
