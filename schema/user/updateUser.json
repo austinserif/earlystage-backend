@@ -9,12 +9,8 @@
         {
             "updates": [
                 {
-                    "field": "account.name",
+                    "field": "entity.name",
                     "value": "Fake Name"
-                },
-                {
-                    "field": "metadata.lastModified",
-                    "value": "2020-11-25T00:34:44.847Z"
                 }
             ]
         }
@@ -32,8 +28,8 @@
             "examples": [
                 [
                     {
-                        "field": "account.name",
-                        "value": "Austin Serif"
+                        "field": "entity.name",
+                        "value": "Fake Name"
                     },
                     {
                         "field": "metadata.lastModified",
@@ -69,10 +65,11 @@
                                 "description": "An explanation about the purpose of this instance.",
                                 "default": "",
                                 "examples": [
-                                    "account.name"
+                                    "entity.name"
                                 ],
                                 "enum": [
-                                    "account.name"
+                                    "entity.name",
+                                    "entity.domain"
                                 ]
                             },
                             "value": {
@@ -82,7 +79,7 @@
                                 "description": "An explanation about the purpose of this instance.",
                                 "default": "",
                                 "examples": [
-                                    "Austin Serif"
+                                    "Fake Name"
                                 ]
                             }
                         },
