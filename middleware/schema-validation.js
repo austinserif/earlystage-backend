@@ -1,5 +1,5 @@
 const userSchema = require('../schema/user/newUser.json');
-const updateSchema = require('../schema/user/updateUser.json')
+const updateUserSchema = require('../schema/user/updateUser.json')
 const jsonschema = require('jsonschema');
 const ExpressError = require('../helpers/expressError');
 
@@ -27,7 +27,7 @@ function validateUpdatedUser(request, response, next) {
 
         const parsedUpdates = JSON.parse(updates);
 
-        const result = jsonschema.validate({updates: parsedUpdates}, updateSchema);
+        const result = jsonschema.validate({updates: parsedUpdates}, updateUserSchema);
 
         if (result.errors.length) {
             // pass a 400 error to the error-usernamer
@@ -45,4 +45,29 @@ function validateUpdatedUser(request, response, next) {
     }
 }
 
-module.exports = { validateNewUser, validateUpdatedUser };
+function validateUpdatedWorkspace(request, response, next) {
+    try {
+        const { updates } = request.body;
+
+        const parsedUpdates = JSON.parse(updates);
+
+        const result = jsonschema.validate({updates: parsedUpdates}, updateWorkspaceSchema);
+
+        if (result.errors.length) {
+            // pass a 400 error to the error-usernamer
+            let listOfErrors = result.errors.map(err => err.stack);
+            const err = new ExpressError(listOfErrors, 400);
+            console.log(result);
+            return next(err); 
+        }
+
+        request.body.updates = parsedUpdates;
+
+        return next();
+
+    } catch(err) {
+        return next(err);
+    }
+}
+
+module.exports = { validateNewUser, validateUpdatedUser, validateUpdatedWorkspace };
