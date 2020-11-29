@@ -10,6 +10,8 @@ const { validateUpdatedWorkspace } = require('../middleware/schema-validation');
 const bcrypt = require('bcrypt');
 const { BCRYPT_WORK_FACTOR } = require('../config');
 const { authorizeCertainUser, authorizeAdmin } = require('../middleware/route-protection');
+const components = require('./components');
+router.use('/components', components);
 
 /**
  *  GET /users/workspaces/:email
@@ -52,7 +54,7 @@ router.post('/:email', authorizeCertainUser, async function(request, response, n
     try {
         const { email } = request.params;
         const { name, domain } = request.body;
-        const res = await Workspace.new(email, { companyName: name, companyDomain: domain});
+        const res = await Workspace.new(email, { name, domain});
         return response.json(res);
     } catch(err) {
         return next(err);
@@ -74,11 +76,28 @@ router.patch('/:email/:workspaceId', authorizeCertainUser, validateUpdatedWorksp
         const decodedEmail = decodeURIComponent(email);
 
         const res = await Workspace.update(workspaceId, decodedEmail, updates);
-
-        return res;
+        return response.json(res);
     } catch(err) {
         return next(err);
     }
 });
+
+/** 
+ * DELETE /users/workspaces/:email/:workspaceId
+ * 
+ * delete workspace object
+ */
+router.delete('/:email/:workspaceId/', authorizeCertainUser, async function(request, response, next) {
+    try {
+        const { email, workspaceId } = request.params;
+
+        //throw error if not authorized
+        const res = await Workspace.delete(workspaceId, email);
+
+        return response.json(res);
+    } catch(err) {
+        return next(err);
+    }
+})
 
 module.exports = router;
