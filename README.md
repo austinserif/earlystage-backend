@@ -55,9 +55,9 @@ This is another message for those coming from SQL databases primarily. Unlike ma
 1. GET `/users/` *Admin Only*
 
 2. POST `/users/:email`
-    **Body**: `name`, `email`, `password`.
-    **Description**:
-    **Responses**:
+    - **Body**: `name`, `email`, `password`.
+    - **Description**
+    - **Responses**
         201. Resource created successfully
         409. Email already in use
 
