@@ -5,11 +5,8 @@ const ExpressError = require('../helpers/expressError');
 const router = express.Router();
 const User = require('../models/user');
 const Workspace = require('../models/workspace');
-const jsonschema = require('jsonschema');
 const { validateUpdatedWorkspace } = require('../middleware/schema-validation');
-const bcrypt = require('bcrypt');
-const { BCRYPT_WORK_FACTOR } = require('../config');
-const { authorizeCertainUser, authorizeAdmin } = require('../middleware/route-protection');
+const { authorizeCertainUser } = require('../middleware/route-protection');
 const components = require('./components');
 router.use('/components', components);
 
