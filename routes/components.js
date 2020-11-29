@@ -19,11 +19,11 @@ const router = express.Router();
 router.post('/:email/:workspaceId', authorizeCertainUser, async function(request, response, next) {
     try {
         //get email and workspaceId from params object
-        const { workspaceId } = request.params;
+        const { workspaceId, email } = request.params;
         const { questionId, answer } = request.body;
 
         //call `new` method on components model, passing in key data
-        const result = await Component.new(questionId, workspaceId, answer);
+        const result = await Component.new(email, questionId, workspaceId, answer);
 
         //return the result
         return response.json(result);
