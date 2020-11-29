@@ -1,12 +1,17 @@
 const userSchema = require('../schema/user/newUser.json');
 const updateUserSchema = require('../schema/user/updateUser.json')
+const updateWorkspaceSchema = require('../schema/workspace/updateWorkspace.json');
 const jsonschema = require('jsonschema');
 const ExpressError = require('../helpers/expressError');
 
-/** validate data in client request body with json schema */
+/** 
+ * Validate data in client request body with json schema
+ * for new user
+ */
 function validateNewUser(request, response, next) {
     try {
         const { email, name, password } = request.body;
+
         const result = jsonschema.validate({ email, name, password }, userSchema);
 
         if (result.errors.length) {
@@ -21,6 +26,10 @@ function validateNewUser(request, response, next) {
     }
 }
 
+/** 
+ * Validate data in client request body with json schema
+ * for updated user
+ */
 function validateUpdatedUser(request, response, next) {
     try {
         const { updates } = request.body;
@@ -45,6 +54,10 @@ function validateUpdatedUser(request, response, next) {
     }
 }
 
+/** 
+ * Validate data in client request body with json schema
+ * for updated workspace
+ */
 function validateUpdatedWorkspace(request, response, next) {
     try {
         const { updates } = request.body;
