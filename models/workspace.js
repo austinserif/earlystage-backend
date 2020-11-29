@@ -1,5 +1,6 @@
 const getConnection = require('./connect');
 const ExpressError = require('../helpers/ExpressError');
+const { ObjectID } = require('bson');
 
 class Workspace {
 
@@ -7,11 +8,13 @@ class Workspace {
      * and creates a new workspace if the workspace's name
      * is not already taken
      */
+
+
+     //NOTE: CHANGE THIS INTO A COMPOUND QUERY
     static async new(email, workspace) {
-        const checkpoints = { };
         const [ db, client ] = await getConnection();
         try {
-            const { companyName, companyDomain } = workspace;
+            const { name, domain } = workspace;
 
             const now = new Date();
 
@@ -19,8 +22,8 @@ class Workspace {
             const result = await db.collection('workspaces').insertOne({ 
                 userEmail: email,
                 entity: {
-                    name: companyName,
-                    domain: companyDomain
+                    name,
+                    domain
                 },
                 components: [],
                 metadata: {
@@ -53,21 +56,28 @@ class Workspace {
         try {
 
             //will throw error if user does not match workspace id
-            const user = await Workspace.getById(workspaceId, email);
+            await Workspace.getById(workspaceId, email);
 
             //map changes into updates object
             const updatesObj = {};
             updates.forEach(o => (updatesObj[o.field] = o.value));
 
             //update workspace and get result
-            const result = await db.collection('workspaces').updateOne(
-                {_id: workspaceId},
-                {
-                    $set: {...updatesObj, 'metadata.lastModified': new Date()}
-                }
-            );
+            const result = await db.collection('workspaces')
+                .updateOne(
+                    {
+                        _id: new ObjectID(workspaceId)
+                    },
+                    {
+                        $set: {
+                            ...updatesObj, 
+                            'metadata.lastModified': new Date()
+                        }
+                    }
+                );
 
             const { matchedCount, modifiedCount } = result;
+
 
             if ( !matchedCount || !modifiedCount ) {
                 throw new ExpressError('Resource either could not be found, or could not be updated, or both', 404)
@@ -100,6 +110,31 @@ class Workspace {
             } else {
                 throw new ExpressError('Unauthorized: you can only view your own workspaces', 401);
             }
+        } catch(err) {
+            throw new ExpressError(err.message, err.status || 500);
+        }
+
+        finally {
+            client.close();
+        }
+    }
+
+    static async delete(workspaceId, email) {
+        const [ db, client ] = await getConnection();
+        try {
+            //will throw error if not authorized
+            await Workspace.getById(workspaceId, email);
+
+            const result = await db.collection('workspaces').removeOne({_id: new ObjectID(workspaceId)});
+
+            await db.collection('users').updateOne(
+                {email},
+                { $pull: { workspaces: workspaceId}}
+            );
+
+            //return result
+            return result;
+
         } catch(err) {
             throw new ExpressError(err.message, err.status || 500);
         }
