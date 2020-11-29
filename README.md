@@ -52,17 +52,42 @@ This is another message for those coming from SQL databases primarily. Unlike ma
 ## Routes
 
 #### Users
-1. GET `/users/:id`
-2. POST `/users/:id`
-3. UPDATE `/users/:id`
-4. DELETE `/users/:id`
+1. GET `/users/` *Admin Only*
+
+2. POST `/users/:email`
+    **Body**: `name`, `email`, `password`.
+    **Description**:
+    **Responses**:
+        201. Resource created successfully
+        409. Email already in use
+
+    example request:
+    ```js
+        const response = await axios({
+            method: 'post',
+            url,
+            data: {
+                name,
+                email,
+                password 
+            }
+        });
+    ```
+3. PATCH `/users/:email` *Authorized User Only*
+4. DELETE `/users/:email` *Authorized User Only*
 
 #### Workspaces
-1. GET `/workspaces/:id`
-2. POST `/workspaces/:id`
-3. UPDATE `/workspaces/:id`
-4. DELETE `/workspaces/:id`
+1. GET `/workspaces/:id`  *Authorized User's Workspace Only*
+2. POST `users/:email/workspaces/:workspaceId` *Authorized User Only*
+3. PATCH `users/:email/workspaces/:workspaceId` *Authorized User's Workspace Only*
+4. DELETE `users/:email/workspaces/:workspaceId` *Authorized User's Workspace Only*
 
+#### Questions
+1. GET `/users/:email/questions` *Authorized User Only*
+2. GET `/users/:email/questions/:questionId` *Authorized User Only*
+3. POST `/users/:email/questions` *Authorized User Only*
+4. PATCH `/users/:email/questions/:questionId` *Authorized User Only*
+5. DELETE `/users/:email/questions/:questionId` *Authorized User Only*
 
 ## Database Schema
 
