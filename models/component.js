@@ -1,7 +1,9 @@
 const getConnection = require('./connect');
 const { createComponentDocument } = require('../helpers/createDocument');
 const Workspace = require('./workspace');
-const { ObjectID } = require('bson'); 
+const Question = require('./question');
+const { updateCollection, updateCollectionArray } = require('../helpers/updateCollection');
+const ExpressError = require('../helpers/ExpressError');
 
 class Component {
     /**
@@ -10,7 +12,7 @@ class Component {
      * @param {String} workspaceId 
      * @param {*} answer 
      */
-    static async new(email, workspaceId, questionId, answer) {
+    static async new(email, questionId, workspaceId, answer) {
         const [ db, client ] = await getConnection();
         try {
 
@@ -18,8 +20,9 @@ class Component {
             await Workspace.getById(workspaceId, email); //if false throw error
 
             //verify that questionId exists
+            const question = await Question.getById(questionId);
 
-            //
+            //EVENTUALY INCLUDE LOGIC HERE FOR PASSING A REGEX FOR ANSWER FORMATTING (client and server side)
 
             //turn inputs into a full component object
             const newComponent = createComponentDocument({questionId, workspaceId, answer});
@@ -30,21 +33,13 @@ class Component {
             //destructure result from ops array (there should only be one item in the array)
             const [ result ] = ops;
 
-            //place id into componentId array on the workspaces method
-            await db.collection('workspaces').updateOne(
-                {_id: {$eq: new ObjectID(workspaceId)}},
-                {
-                    $push: {
-                        "components": result._id
-                    }
-                }
-            );
+            await updateCollectionArray('workspaces', 'components', result._id, workspaceId, db);
 
             //return result
             return result;
 
         } catch(err) {
-            throw new ExpressError(err.message. err.status || 500);
+            throw new ExpressError(err.message, err.status || 500);
         }
 
         finally {
@@ -63,16 +58,21 @@ class Component {
     static async getById(workspaceId, componentId) {
         const [ db, client ] = await getConnection();
         try {
-            // const result = await db.collection('components').find({_id: new ObjectID(componentId)});
-            const cursor = await db.collection('components').find(
-                { $and: [
-                    {_id: new ObjectID(componentId)},
-                    {workpsaceId: new ObjectID(workspaceId)}
-                ]}  
-            );
-
+            //find requested component and return result from cursor
+            const cursor = await db.collection('components').find(componentId);
             const [ result ] = await cursor.toArray();
 
+            //throw error if id doesn't yield anything
+            if (!result) {
+                throw new ExpressError('No component was found corresponding to the given componentId', 404);
+            }
+
+            //throw error if component object retrieved, but not associated with selected workspace
+            if (result.workspaceId !== workspaceId) {
+                throw new ExpressError('Unauthorized: The requested component does not belong to the users workspace', 401);
+            }
+
+            //return result
             return result;
 
         } catch(err) {
@@ -94,15 +94,20 @@ class Component {
      * corresponding component object to reflect changes proposed by the updates object, so long 
      * as the component object contains a workspaceId property matching the input arg.
      */
-    static async update(workspaceId, componentId, updates) {
+    static async update(workspaceId, componentId, email, updates) {
         const [ db, client ] = await getConnection();
         try {
+            //verify that workspace and email are properly related
+            await Workspace.getById(workspaceId, email);
 
             //verify componentId and workspaceId are properly related
+            await Component.getById(workspaceId, componentId);
 
-            //execute updates
+            //attempts to update colleciton and store result, otherwise throws an erro
+            const result = await updateCollection('components', updates, componentId, db);
 
-            //return confirmation or lack thereof
+            //return result
+            return result;
 
         } catch(err) {
             //catch error and throw new express error
