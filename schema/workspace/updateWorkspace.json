@@ -69,10 +69,11 @@
                                 "description": "An explanation about the purpose of this instance.",
                                 "default": "",
                                 "examples": [
-                                    "account.name"
+                                    "entity.name"
                                 ],
                                 "enum": [
-                                    "account.name"
+                                    "entity.name",
+                                    "entity.domain"
                                 ]
                             },
                             "value": {
