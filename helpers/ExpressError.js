@@ -5,7 +5,11 @@
  * 
  * @example
  * ```js
- *  
+ *  try {
+ *  //logic here...
+ * } catch(err) {
+ *    throw new ExpressError(err.message, err.status || 500);
+ * }
  * ```
  *
  *  Since we are using JSONSchema and will return an array of
