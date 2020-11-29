@@ -58,8 +58,8 @@ This is another message for those coming from SQL databases primarily. Unlike ma
     - **Body**: `name`, `email`, `password`.
     - **Description**
     - **Responses**
-        - 201. Resource created successfully
-        - 409. Email already in use
+        - 201: Resource created successfully
+        - 409: Email already in use
 
     example request:
     ```js
