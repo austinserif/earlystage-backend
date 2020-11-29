@@ -1,6 +1,7 @@
 const getConnection = require('./connect');
 const ExpressError = require('../helpers/ExpressError');
 const { ObjectID } = require('bson');
+const { updateCollection } = require('../helpers/updateCollection');
 
 class Workspace {
 
@@ -17,6 +18,8 @@ class Workspace {
             const { name, domain } = workspace;
 
             const now = new Date();
+
+            //UPDATE THIS CODE BLOCK
 
             // insert new workspace in workspace collection
             const result = await db.collection('workspaces').insertOne({ 
@@ -58,30 +61,7 @@ class Workspace {
             //will throw error if user does not match workspace id
             await Workspace.getById(workspaceId, email);
 
-            //map changes into updates object
-            const updatesObj = {};
-            updates.forEach(o => (updatesObj[o.field] = o.value));
-
-            //update workspace and get result
-            const result = await db.collection('workspaces')
-                .updateOne(
-                    {
-                        _id: new ObjectID(workspaceId)
-                    },
-                    {
-                        $set: {
-                            ...updatesObj, 
-                            'metadata.lastModified': new Date()
-                        }
-                    }
-                );
-
-            const { matchedCount, modifiedCount } = result;
-
-
-            if ( !matchedCount || !modifiedCount ) {
-                throw new ExpressError('Resource either could not be found, or could not be updated, or both', 404)
-            }
+            const result = await updateCollection('workspaces', updates, workspaceId, db);
             
             return result;
 
@@ -104,6 +84,9 @@ class Workspace {
             const cursor = await db.collection('workspaces').find(workspaceId);
             const [ result ] = await cursor.toArray();
             const { userEmail } = result;
+
+            console.log(userEmail);
+            console.log(email);
 
             if (userEmail === email) {
                 return result;
