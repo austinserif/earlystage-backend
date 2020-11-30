@@ -271,7 +271,7 @@ class User {
             throw new ExpressError('Incorrect code, account not verified', 401)
 
         } catch (err) {
-            throw new ExpressError(err.message, err.status || 500)
+            throw new ExpressError(err.message, err.status || 500);
         }
     }
 
