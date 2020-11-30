@@ -1,4 +1,5 @@
 const { ObjectID } = require('bson');
+const ExpressError = require('./ExpressError');
 
 /**
  * 
@@ -56,9 +57,7 @@ const updateCollectionArray = async (collectionName, arrayPath, resource, target
             {_id: new ObjectID(targetId)},
             {
                 $push: {
-                    [arrayPath]: {
-                        $in: [resource]
-                    }
+                    [arrayPath]: resource
                 }
             }
         );
