@@ -1,6 +1,6 @@
 const express = require('express');
 const Question = require('../models/question');
-const { authorizeCertainUser } = require('../middleware/route-protection');
+const { authorizeCertainUser, authorizeAdmin } = require('../middleware/route-protection');
 const router = express.Router();
 
 
@@ -45,6 +45,20 @@ router.post('/:email/questions', async function(request, response, next) {
     }
 });
 
+router.post('/:email/questions/admin', authorizeAdmin, async function(request, response, next) {
+    try {
+        const email = undefined;
+
+        const { question, category } = request.body;
+
+        const result = await Question.new(question, category, email, true);
+
+        return response.json(result);
+    } catch(err) {
+
+    }
+})
+
 router.get('/:email/questions', async function(request, response, next) {
     try {
         const { email } = request.params;
@@ -55,6 +69,23 @@ router.get('/:email/questions', async function(request, response, next) {
     } catch(err) {
         return next(err);
     }
-})
+});
+
+router.delete('/:email/questions/:questionId', authorizeCertainUser, async function(request, response, next) {
+    try {
+
+        //get email and questionId
+        const { email, questionId } = request.params;
+
+        //delete question, will throw error if match could not be made
+        await Question.delete(email, questionId);
+
+        //return
+        return response.json({message: "Resource deleted"});
+
+    } catch(err) {
+        return next(err);
+    }
+});
 
 module.exports = router;
