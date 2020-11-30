@@ -7,13 +7,11 @@ const User = require('../models/user');
 const Workspace = require('../models/workspace');
 const { validateUpdatedWorkspace } = require('../middleware/schema-validation');
 const { authorizeCertainUser } = require('../middleware/route-protection');
-const components = require('./components');
-router.use('/components', components);
 
 /**
- *  GET /users/workspaces/:email
+ *  GET /users/:email/workspaces
 */
-router.get('/:email', authorizeCertainUser, async function(request, response, next) {
+router.get('/:email/workspaces', authorizeCertainUser, async function(request, response, next) {
     try {
         const { email } = request.params;
         const res = await User.getUserByEmail(email);
@@ -28,7 +26,7 @@ router.get('/:email', authorizeCertainUser, async function(request, response, ne
  * GET /users/workspaces/:email/:workspaceId 
  * 
  * */
-router.get('/:email/:workspaceId', authorizeCertainUser, async function(request, response, next) {
+router.get('/:email/workspaces/:workspaceId', authorizeCertainUser, async function(request, response, next) {
     try {
         const { email, workspaceId } = request.params;
         const res = await Workspace.getById(workspaceId, email);
@@ -47,7 +45,7 @@ router.get('/:email/:workspaceId', authorizeCertainUser, async function(request,
  * create a new workspace for a given user
  * 
  *  */
-router.post('/:email', authorizeCertainUser, async function(request, response, next) {
+router.post('/:email/workspaces', authorizeCertainUser, async function(request, response, next) {
     try {
         const { email } = request.params;
         const { name, domain } = request.body;
@@ -63,7 +61,7 @@ router.post('/:email', authorizeCertainUser, async function(request, response, n
  * 
  * edit the name and domain fields of a workspace
  */
-router.patch('/:email/:workspaceId', authorizeCertainUser, validateUpdatedWorkspace, async function(request, response, next) {
+router.patch('/:email/workspaces/:workspaceId', authorizeCertainUser, validateUpdatedWorkspace, async function(request, response, next) {
     try {
         const { email, workspaceId } = request.params;
 
@@ -84,7 +82,7 @@ router.patch('/:email/:workspaceId', authorizeCertainUser, validateUpdatedWorksp
  * 
  * delete workspace object
  */
-router.delete('/:email/:workspaceId/', authorizeCertainUser, async function(request, response, next) {
+router.delete('/:email/workspaces/:workspaceId/', authorizeCertainUser, async function(request, response, next) {
     try {
         const { email, workspaceId } = request.params;
 
