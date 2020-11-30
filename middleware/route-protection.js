@@ -48,12 +48,12 @@ function authorizeAdmin(request, response, next) {
     try {
         const { user } = request;
 
-        if (!user || !user.is_admin) {
+        if (!user || !user.isAdmin) {
             const err = new ExpressError("Unauthorized, admin access only", 401);
             return next(err);
         }
 
-        if (user.is_admin) {
+        if (user.isAdmin) {
             return next();
         }
 
