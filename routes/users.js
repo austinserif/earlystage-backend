@@ -8,8 +8,10 @@ const { validateNewUser, validateUpdatedUser } = require('../middleware/schema-v
 const { authorizeCertainUser, authorizeAdmin } = require('../middleware/route-protection');
 const workspaces = require('./workspaces');
 const questions = require('./questions');
+const components = require('./components');
 router.use(questions);
-router.use('/workspaces', workspaces);
+router.use(workspaces);
+router.use(components);
 
 /**
  * GET /users
