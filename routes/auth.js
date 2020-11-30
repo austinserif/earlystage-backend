@@ -23,8 +23,8 @@ router.post('/', async function(request, response, next) {
 router.post('/verify', async function(request, response, next) {
     try {
         const { email, code } = request.body;
-        const res = await User.verifyAccount(email, code);
-        return response.json(res);
+        await User.verifyAccount(email, code);
+        return response.json({message: "You account has been verified!"}).statusCode(203);
     } catch (err) {
         return next(err);
     }
