@@ -210,10 +210,10 @@ class User {
         try {
             const user = await User.getUserByEmail(email);
             const { _id, account } = user;
-            const { name, isVerified } = account;
+            const { name, isVerified, isAdmin } = account;
             if (user) {
                 if (await bcrypt.compare(password, user.account.password)) {
-                    const token = jwt.sign({ email, _id, isVerified, name }, SECRET_KEY);
+                    const token = jwt.sign({ email, _id, isVerified, isAdmin, name }, SECRET_KEY);
                     return { token };
                 }
             }
