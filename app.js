@@ -18,12 +18,10 @@ app.use(morgan("tiny"));
 app.use(authenticate);
 
 //include abstracçted routes here
-const questions = require('./routes/questions');
 const users = require('./routes/users');
 const auth = require('./routes/auth');
 
 //"use" those routes here
-app.use('/questions', questions);
 app.use('/login', auth);
 app.use('/users', users);
 
