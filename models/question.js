@@ -1,9 +1,9 @@
+const ExpressError = require('../helpers/ExpressError');
+const User = require('./user');
+const { ObjectID } = require('bson');
+const { updateCollectionArray } = require('../helpers/updateCollection');
 const getConnection = require('./connect');
 const { createQuestionDocument, createPresetQuestionDocument } = require('../helpers/createDocument');
-const ExpressError = require('../helpers/ExpressError');
-const User = require('./user')
-const { updateCollectionArray } = require('../helpers/updateCollection');
-
 
 class Question {
 
@@ -16,10 +16,12 @@ class Question {
         const [ db, client ] = await getConnection();
         try {
             //get cursor from database find query
-            const cursor = await db.collection('questions').find(questionId);
+            const cursor = await db.collection('questions').find({_id: new ObjectID(questionId)});
 
             //destructure result object from `cursor.toArray` method 
-            const [ result ] = await cursor.toArray();
+            const objArray = await cursor.toArray();
+
+            const [ result ] = objArray;
 
             //throw error if result is null
             if (!result) {
@@ -39,7 +41,38 @@ class Question {
         }
     }
 
-    static async new(question, category, email, isPreset=false) {
+    static async getAllQuestions(email) {
+        const [ db, client ] = await getConnection();
+        try {
+            const cursor = await db.collection('questions').find(
+                { $or: [ {userEmail: {$eq: email}}, {isPreset: {$eq: true}} ] }
+            )
+
+            const result = await cursor.toArray();
+
+            if (!result) {
+                throw new ExpressError('No Questions were found corresponding', 404);
+            }
+
+            return result;
+
+        } catch(err) {
+            throw new ExpressError(err.message, err.status || 500);
+        }
+
+        finally {
+            client.close();
+        }
+    }
+
+    /**
+     * 
+     * @param {*} question 
+     * @param {*} category 
+     * @param {*} email 
+     * @param {*} isPreset 
+     */
+    static async new(question, category, email, isPreset) {
         const [ db, client ] = await getConnection();
         try {
             //create new question document from inputs
@@ -47,11 +80,13 @@ class Question {
 
             //insert into collection and destructure result
             const { ops } = await db.collection('questions').insertOne(newQuestion);
+
             const [ result ] = ops;
 
             const user = await User.getUserByEmail(email);
             if (!!user) {
-                await updateCollectionArray('users', 'questions', result._id, user._id, db);                
+
+                await updateCollectionArray('users', 'questions', result._id, user._id, db);
             }
 
             //return result
