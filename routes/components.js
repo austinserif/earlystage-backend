@@ -16,7 +16,7 @@ const router = express.Router();
  * 
  * create a new component
  */
-router.post('/:email/:workspaceId', authorizeCertainUser, async function(request, response, next) {
+router.post('/:email/workspaces/:workspaceId/components', authorizeCertainUser, async function(request, response, next) {
     try {
         //get email and workspaceId from params object
         const { workspaceId, email } = request.params;
@@ -28,6 +28,18 @@ router.post('/:email/:workspaceId', authorizeCertainUser, async function(request
         //return the result
         return response.json(result);
 
+    } catch(err) {
+        return next(err);
+    }
+});
+
+router.get('/:email/workspaces/:workspaceId/components/:componentId', async function(request, response, next) {
+    try {
+        const { workspaceId, componentId } = request.params;
+
+        const result = await Component.getById(workspaceId, componentId);
+
+        return response.json(result);
     } catch(err) {
         return next(err);
     }
