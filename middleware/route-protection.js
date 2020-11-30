@@ -28,7 +28,7 @@ function authenticate(request, response, next) {
 function authorize(request, response, next) {
     try {
         if (!request.user) {
-            const err = new ExpressError("Unauthorized", 401);
+            const err = new ExpressError("Unauthorized, a valid token is required to access this resource", 401);
             return next(err);
         } else {
             const { isVerified } = request.user;
@@ -74,7 +74,7 @@ function authorizeCertainUser(request, response, next) {
         const { user, params } = request;
 
         if (!user) {
-            const err = new ExpressError("Unauthorized", 401);
+            const err = new ExpressError("Unauthorized, a valid token is required to access this resource", 401);
             return next(err);
         }
 
@@ -88,7 +88,7 @@ function authorizeCertainUser(request, response, next) {
             return next();
         }
 
-        const err = new ExpressError("Unauthorized", 401);
+        const err = new ExpressError("Unauthorized, users are only allowed access to their own data", 401);
         return (next(err));
 
     } catch(err) {
