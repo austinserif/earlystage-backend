@@ -99,6 +99,46 @@ class Question {
             client.close();
         }
     }
+
+    static async delete(email, questionId) {
+        const [ db, client ] = await getConnection();
+        try {
+
+            //remove question associated with questionId if it meets certain conditions
+            const res = await db.collection('questions').removeOne(
+                {
+                    $and: [
+                            {userEmail: { $eq: email }},
+                            {_id: { $eq: new ObjectID(questionId)}},
+                            {isPreset: { $eq: false }}
+                    ]
+                }
+            )
+
+            //udpdate user questions reference array --> the logic here could probably be better
+            await db.collection('users').updateOne(
+                {email: {$eq: email}},
+                {
+                    $pull: { questions: questionId }
+                }
+            );
+
+            //destructure result
+            const { nDeleted } = res;
+
+            //throw error if nothing was actually deleted
+            if (!nDeleted) throw new ExpressError('Question could not be deleted', 401); //what status code is this?
+
+            return res;
+            
+        } catch(err) {
+            throw new ExpressError(err.message, err.status || 500);
+        }
+
+        finally {
+            client.close();
+        }
+    }
 }
 
 module.exports = Question;
