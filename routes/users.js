@@ -7,7 +7,8 @@ const User = require('../models/user');
 const { validateNewUser, validateUpdatedUser } = require('../middleware/schema-validation');
 const { authorizeCertainUser, authorizeAdmin } = require('../middleware/route-protection');
 const workspaces = require('./workspaces');
-
+const questions = require('./questions');
+router.use(questions);
 router.use('/workspaces', workspaces);
 
 /**
@@ -88,9 +89,9 @@ router.patch('/:email', authorizeCertainUser, validateUpdatedUser, async functio
         const decodedEmail = decodeURIComponent(email);
         
         //pass decoded email and updates array to the update method
-        const user = await User.update(decodedEmail, updates);
+        await User.update(decodedEmail, updates);
 
-        return response.json(user);
+        return response.json({message: "User updated"});
     } catch(err) {
         return next(err);
     }
@@ -103,9 +104,21 @@ router.delete('/:email', authorizeCertainUser, async function(request, response,
 
         //decode email
         const decodedEmail = decodeURIComponent(email);
+
+        //get password from request body
         const { password } = request.body;
-        const isDeleted = await User.delete(decodedEmail, password);
-        return response.json(isDeleted);
+
+        //if no password throw error
+        if (!password) {
+            throw new ExpressError('Must include valid password credential in the request body to delete resource', 401);
+        }
+
+        //response from database method, will throw error if failure has occurred
+        await User.delete(decodedEmail, password);
+
+        //return response
+        return response.json({message: 'Resource deleted'});
+
     } catch(err) {
         return next(err);
     }
