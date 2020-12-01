@@ -4,13 +4,14 @@ const Workspace = require('./workspace');
 const Question = require('./question');
 const { updateCollection, updateCollectionArray } = require('../helpers/updateCollection');
 const ExpressError = require('../helpers/ExpressError');
+const ObjectID = require('bson');
 
 class Component {
     /**
      * 
-     * @param {String} questionId 
+     * @param {String} questionId
      * @param {String} workspaceId 
-     * @param {*} answer 
+     * @param {*} answer
      */
     static async new(email, questionId, workspaceId, answer) {
         const [ db, client ] = await getConnection();
@@ -119,13 +120,23 @@ class Component {
         }
     }
 
-    static async delete(workspaceId, componentId) {
+    static async delete(email, workspaceId, componentId) {
         const [ db, client ] = await getConnection();
         try {
 
-            //verify workspace and component realtionship
+            //verify workspace and email realtionship            
+            await Workspace.getById(workspaceId, email);
+
+            //verify component workspace component
+            await Component.getById(workspaceId, componentId)
 
             //execute deletion
+            const result = await db.collection('components').removeOne({_id: new ObjectID(componentId)});
+
+            await db.collection('workspaces').updateOne(
+                {_id: new ObjectID(workspaceId)},
+                { $pull: { components: componentId}}
+            );
 
             //return confirmation
 
