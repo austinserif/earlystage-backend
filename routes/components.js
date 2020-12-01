@@ -45,4 +45,30 @@ router.get('/:email/workspaces/:workspaceId/components/:componentId', async func
     }
 });
 
+router.patch('/:email/workspaces/:workspaceId/components/:componentId', async function(request, response, next) {
+    try {
+        const { workspaceId, componentId, email } = request.params;
+
+        const { updates } = request.body;
+
+        await Component.update(workspaceId, componentId, email, updates);
+
+        return response.json({message: "Resource successfully updated"});
+    } catch(err) {
+        return next(err);
+    }
+})
+
+router.delete('/:email/workspaces/:workspaceId/components/:componentId', async function(request, response, next) {
+    try {
+        const { workspaceId, componentId, email } = request.params;
+
+        await Component.delete(email, workspaceId, componentId);
+
+        return response.json({message: "Resource deleted"});
+    } catch {
+        return next(err);
+    }
+});
+
 module.exports = router;
