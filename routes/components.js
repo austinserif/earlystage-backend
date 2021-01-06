@@ -12,9 +12,13 @@ const router = express.Router();
 
 
 /**
- * POST /users/workspaces/components/:email/:workspaceId
+ * POST /users/:email/workspaces/:workspaceId/components
  * 
- * create a new component
+ * Takes workspaceId and email in the url params object, and a questionId + answer arguments in 
+ * the request body, and creates a new object. The generated objectId for the new component will also 
+ * be added to the components array on the workspace object corresponding to the input workspaceId.
+ * 
+ * The newly created object is returned if successful
  */
 router.post('/:email/workspaces/:workspaceId/components', authorizeCertainUser, async function(request, response, next) {
     try {

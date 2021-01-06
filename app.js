@@ -5,6 +5,8 @@ const ExpressError = require("./helpers/expressError");
 
 const morgan = require("morgan");
 
+const cors = require("cors");
+
 const app = express();
 
 const { authenticate } = require('./middleware/route-protection');
@@ -14,6 +16,8 @@ app.use(express.urlencoded({extended: true}));
 
 // logging system
 app.use(morgan("tiny"));
+
+app.use(cors());
 
 app.use(authenticate);
 

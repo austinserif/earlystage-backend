@@ -5,8 +5,10 @@ const router = express.Router();
 /** POST /login
  * authenticate a user and return JSON Web Token
  * w/ a payload including values for:
- * - username
- * - is_admin
+ * - email
+ * - isVerified
+ * - isAdmin
+ * - name
  * 
  *      --> {token: token}
  */
@@ -20,6 +22,10 @@ router.post('/', async function(request, response, next) {
     }
 });
 
+/** POST /login/verify
+ * Takes an email and verificationCode in the request body and returns
+ * a success message if model verification method validates credentials.
+ */
 router.post('/verify', async function(request, response, next) {
     try {
         const { email, code } = request.body;
