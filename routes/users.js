@@ -1,7 +1,7 @@
 /** user.js file contains logic for  */
 
 const express = require('express');
-const ExpressError = require('../helpers/expressError');
+const ExpressError = require('../helpers/ExpressError');
 const router = express.Router();
 const User = require('../models/user');
 const { validateNewUser, validateUpdatedUser } = require('../middleware/schema-validation');
