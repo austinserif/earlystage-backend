@@ -1,5 +1,5 @@
 const express = require('express');
-const ExpressError = require('../helpers/expressError');
+const ExpressError = require('../helpers/ExpressError');
 
 const User = require('../models/user');
 const Component = require('../models/component');
