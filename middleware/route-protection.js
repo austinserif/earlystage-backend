@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const { SECRET_KEY } = require('../config');
-const ExpressError = require('../helpers/expressError');
+const ExpressError = require('../helpers/ExpressError');
 
 /** Looks for json web token in request, and assigns credentials 
  * to user as appropriate

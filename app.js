@@ -1,7 +1,7 @@
 /** app.js file for earlystage due diligence */
 const express = require("express");
 
-const ExpressError = require("./helpers/expressError");
+const ExpressError = require("./helpers/ExpressError");
 
 const morgan = require("morgan");
 
