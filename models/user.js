@@ -112,20 +112,24 @@ class User {
             // get first item from array (should be just one item in there anyways!)
             const [ result ] = ops;
 
+            // get login token for newly registered user
+            const { token, uid, isVerified } = await User.login(result.account.email, result.account.password);
+
             //remove unnecessary or private details from result object
             delete result.account.password;
 
-            //replace hash with plain text verification code just for one response
-            result.account.verificationCode = verificationCode;
+            // //replace hash with plain text verification code just for one response
+            // result.account.verificationCode = verificationCode;
 
-            delete result.metadata;
-            delete result.workspaces;
-            delete result.questions;
+            // delete result.metadata;
+            // delete result.workspaces;
+            // delete result.questions;
 
+            // send verification email
             await User.sendVerificationEmail(email, verificationCode);
 
-            //return result
-            return result;
+            //return results of login
+            return { token, uid, isVerified };
 
         } catch (err) {
             //throw error if necessary
