@@ -10,13 +10,13 @@ const router = express.Router();
  * - isAdmin
  * - name
  * 
- *      --> {token: token}
+ *      --> { token, uid, isVerified }
  */
 router.post('/', async function(request, response, next) {
     try {
         const { email, password } = request.body;
-        const { token } = await User.login({email, password});
-        return response.json({token});
+        const { token,  _id, isVerified } = await User.login({email, password});
+        return response.json({ token, uid: _id, isVerified });
     } catch(err) {
         return next(err);
     }
