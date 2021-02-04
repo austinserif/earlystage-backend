@@ -41,7 +41,7 @@ class Workspace {
                 { $push: { 'workspaces': result.ops[0]._id }}
             );
 
-            return addedToUser;
+            return result;
 
         } catch(err) {
             throw new ExpressError(err.message, err.status || 500)
