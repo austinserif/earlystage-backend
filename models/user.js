@@ -103,7 +103,7 @@ class User {
             //hash verification code
             const hashedVerificationCode = await User.hashPassword(String(verificationCode));
 
-            /** place into full userobject schema */
+            /** Given the input information, build a full user document that can be inserted into the database */
             const fullSchema = createUserDocument({name, email, password: hashedPassword, isAdmin: false, verificationCode: hashedVerificationCode});
 
             //destructure ops array from result object
@@ -113,7 +113,7 @@ class User {
             const [ result ] = ops;
 
             // get login token for newly registered user
-            const { token, uid, isVerified } = await User.login(result.account.email, result.account.password);
+            const { token, uid, isVerified } = await User.login({email: result.account.email, password: result.account.password});
 
             //remove unnecessary or private details from result object
             delete result.account.password;
@@ -187,8 +187,6 @@ class User {
 
             //destructure ops array from collection result object
             const user = await User.getUserByEmail(email);
-
-            console.log(user);
 
             if (await bcrypt.compare(password, user.account.password)) {
                 const result = await db.collection('users').deleteOne({ email: { $eq: email} });
