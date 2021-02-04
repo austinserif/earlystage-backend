@@ -106,30 +106,14 @@ class User {
             /** Given the input information, build a full user document that can be inserted into the database */
             const fullSchema = createUserDocument({name, email, password: hashedPassword, isAdmin: false, verificationCode: hashedVerificationCode});
 
-            //destructure ops array from result object
-            const { ops } = await db.collection('users').insertOne(fullSchema);
-
-            // get first item from array (should be just one item in there anyways!)
-            const [ result ] = ops;
-
-            // get login token for newly registered user
-            const { token, uid, isVerified } = await User.login({email: result.account.email, password: result.account.password});
-
-            //remove unnecessary or private details from result object
-            delete result.account.password;
-
-            // //replace hash with plain text verification code just for one response
-            // result.account.verificationCode = verificationCode;
-
-            // delete result.metadata;
-            // delete result.workspaces;
-            // delete result.questions;
+            // insert full user document into database collection
+            await db.collection('users').insertOne(fullSchema);
 
             // send verification email
             await User.sendVerificationEmail(email, verificationCode);
 
-            //return results of login
-            return { token, uid, isVerified };
+            //return success message
+            return { message: "Registration successful!" };
 
         } catch (err) {
             //throw error if necessary
