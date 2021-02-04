@@ -208,7 +208,7 @@ class User {
      * @param {String} credentials.email - unique user identifier string
      * @param {String} credentials.password - plain text password to compare
      * 
-     * @returns {Promise {Object} } - object containing `{ token: <String>, uid: <String>, email: <String> }`
+     * @returns {Promise {Object} } - object containing `{ token: <String>, uid: <String>, isVerified: <Boolean>, email: <String> }`
      */
     static async login({email, password}) {
         try {
@@ -218,7 +218,7 @@ class User {
             if (user) {
                 if (await bcrypt.compare(password, user.account.password)) {
                     const token = jwt.sign({ email, _id, isVerified, isAdmin, name }, SECRET_KEY);
-                    return { token, uid: _id, email };
+                    return { token, uid: _id, isVerified, email };
                 }
             }
 
