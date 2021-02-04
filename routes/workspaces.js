@@ -49,7 +49,7 @@ router.post('/:email/workspaces', authorizeCertainUser, async function(request, 
     try {
         const { email } = request.params;
         const { name, domain } = request.body;
-        const res = await Workspace.new(email, { name, domain});
+        const res = await Workspace.new(email, { name, domain });
         return response.json(res);
     } catch(err) {
         return next(err);
