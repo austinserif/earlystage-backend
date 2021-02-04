@@ -54,7 +54,7 @@ router.post('/', validateNewUser, async function(request, response, next) {
 
         //validate schema
 
-        //create new user 
+        //create new user
         const newUser = await User.createNewUser({ name, email, password });
 
         //return response
