@@ -15,8 +15,8 @@ const router = express.Router();
 router.post('/', async function(request, response, next) {
     try {
         const { email, password } = request.body;
-        const { token,  _id, isVerified } = await User.login({email, password});
-        return response.json({ token, uid: _id, isVerified });
+        const { token, uid, isVerified } = await User.login({email, password});
+        return response.json({ token, uid, isVerified, email });
     } catch(err) {
         return next(err);
     }
