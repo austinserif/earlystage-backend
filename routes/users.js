@@ -55,10 +55,10 @@ router.post('/', validateNewUser, async function(request, response, next) {
         //validate schema
 
         //create new user
-        const newUser = await User.createNewUser({ name, email, password });
+        const successMsg = await User.createNewUser({ name, email, password });
 
-        //return response
-        return response.json(newUser).status(201);
+        //return response with success msg
+        return response.json(successMsg).status(201);
     } catch(err) {
         return next(err);
     }
