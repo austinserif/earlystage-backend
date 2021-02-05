@@ -48,8 +48,11 @@ class User {
 
     /** pass in an email and get back corresponding user object if exists, otherwise
      *  return null
+     * 
+     * @param {String} email unique email id of the user to be retrieved
+     * @param {Boolean} isFiltered defaults to false, can be passed `true` optionally to omit secure account fields like password hash
      */
-    static async getUserByEmail(email) {
+    static async getUserByEmail(email, isFiltered=false) {
         try {
             //establish connection with db server
             const [ db, client ] = await getConnection();
@@ -60,6 +63,18 @@ class User {
             // close connection to client
             client.close();
 
+            // if `isFiltered` passed as true, filter account object before returning results
+            if (isFiltered) {
+                const { account } = result;
+                const filteredAccount = { name: account.name, isVerified: account.isVerified, isAdmin: account.isAdmin };
+
+                return {
+                    ...result,
+                    account: filteredAccount
+                }
+            }
+
+            // otherwise return untouched object
             return result;
         } catch(err) {
             if (client) client.close();
