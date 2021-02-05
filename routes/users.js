@@ -36,7 +36,7 @@ router.get('/:email', authorizeCertainUser, async function(request, response, ne
         //get userEmail from request params object
         const { email } = request.params;
         const decodedEmail = decodeURIComponent(email);
-        const user = await User.getUserByEmail(decodedEmail);
+        const user = await User.getUserByEmail(decodedEmail, isFiltered=true);
         return response.json(user);
     } catch(err) {
         return next(err);
