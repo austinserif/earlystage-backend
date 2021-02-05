@@ -57,10 +57,20 @@ class User {
             //retrieve resource 
             const result = await db.collection('users').findOne({ email: { $eq: email} });
 
+            // close connection to client
             client.close();
 
-            //return result object
-            return result;
+            // destructure account from result
+            const { account } = result;
+
+            // filter out items like password and verification code, keeping non-confidential items like name
+            const returnableAccountData = { name: account.name, isVerified: account.isVerified, isAdmin: account.isAdmin };
+
+            //return result object, overwriting default account w a filtered object
+            return {
+                ...result,
+                account: returnableAccountData
+            };
         } catch(err) {
             if (client) client.close();
             throw new ExpressError(err.message, err.status || 500);
