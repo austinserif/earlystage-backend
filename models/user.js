@@ -60,17 +60,7 @@ class User {
             // close connection to client
             client.close();
 
-            // destructure account from result
-            const { account } = result;
-
-            // filter out items like password and verification code, keeping non-confidential items like name
-            const returnableAccountData = { name: account.name, isVerified: account.isVerified, isAdmin: account.isAdmin };
-
-            //return result object, overwriting default account w a filtered object
-            return {
-                ...result,
-                account: returnableAccountData
-            };
+            return result;
         } catch(err) {
             if (client) client.close();
             throw new ExpressError(err.message, err.status || 500);
