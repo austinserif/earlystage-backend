@@ -19,7 +19,7 @@ class Workspace {
 
             const now = new Date();
 
-            //UPDATE THIS CODE BLOCK
+            //TODO: UPDATE THIS CODE BLOCK
 
             // insert new workspace in workspace collection
             const result = await db.collection('workspaces').insertOne({ 
@@ -35,13 +35,18 @@ class Workspace {
                 }
             });
 
+            const { ops } = result;
+            const res = ops[0];
+
+
+
             //add workspace id of new object to user's workspace array
             const addedToUser = await db.collection('users').updateOne(
                 { email: { $eq: email } },
                 { $push: { 'workspaces': result.ops[0]._id }}
             );
 
-            return result;
+            return res;
 
         } catch(err) {
             throw new ExpressError(err.message, err.status || 500)
