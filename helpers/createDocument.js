@@ -10,7 +10,8 @@ const createUserDocument = ({ name, email, password, isAdmin, verificationCode }
         account: {
             name,
             password,
-            isVerified: false,
+            // isVerified: false,
+            isVerified: true, // temporary patch to verify all new users until mailgun is working again
             verificationCode,
             isAdmin,
         },

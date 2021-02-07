@@ -124,8 +124,14 @@ class User {
             // insert full user document into database collection
             await db.collection('users').insertOne(fullSchema);
 
+            
             // send verification email
-            await User.sendVerificationEmail(email, verificationCode);
+            /**
+             * TEMPORARILY REMOVING THE BELOW LINE UNTIL MAILGUN IS FIXED:
+             * 
+             * await User.sendVerificationEmail(email, verificationCode);
+             * 
+             */
 
             //return success message
             return { message: "Registration successful!" };
