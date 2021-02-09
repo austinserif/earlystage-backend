@@ -51,17 +51,41 @@ class User {
      * 
      * @param {String} email unique email id of the user to be retrieved
      * @param {Boolean} isFiltered defaults to false, can be passed `true` optionally to omit secure account fields like password hash
+     * @param {Boolean} allData defaults to fale, can be passed `true` optionally to include all workspace objects as oposed to just object ids
      */
-    static async getUserByEmail(email, isFiltered=false) {
+    static async getUserByEmail(email, isFiltered=false, allData=false) {
+        //establish connection with db server
+        const [ db, client ] = await getConnection();        
         try {
-            //establish connection with db server
-            const [ db, client ] = await getConnection();
+            // initialize return object
+            const returnObject = {};
+
+
 
             //retrieve resource 
             const result = await db.collection('users').findOne({ email: { $eq: email} });
 
-            // close connection to client
-            client.close();
+            if (allData) {
+                if (result.workspaces && result.workspaces.length > 0) {
+                    // find all workspace documents with an _id property included in the provided array
+                    // returns a cursor type that must be parsed
+                    const cursor = await db.collection('workspaces').find({
+                        _id: {
+                            $in: [
+                                ...result.workspaces
+                            ]
+                        }
+                    });
+                    
+                    // parse cursor and return an array
+                    const fullWorkspaceData = await cursor.toArray();     
+                    
+                    // set workspace data into return object
+                    returnObject.allWorkspaceData = fullWorkspaceData;                    
+                } else {
+                    returnObject.allWorkspaceData = [];
+                };
+            };
 
             // if `isFiltered` passed as true, filter account object before returning results
             if (isFiltered) {
@@ -69,16 +93,23 @@ class User {
                 const filteredAccount = { name: account.name, isVerified: account.isVerified, isAdmin: account.isAdmin };
 
                 return {
-                    ...result,
-                    account: filteredAccount
-                }
-            }
+                    ...returnObject, // if allData is not triggered this will be empty
+                    ...result, // this spreads all of the original results into the new object
+                    account: filteredAccount // and finally this will overwrite any previous instances of an account property
+                };
+            };
 
-            // otherwise return untouched object
-            return result;
+
+            // return any contents of our resultObject accumulator in addition the results of our user query
+            return {
+                ...resultObject,
+                ...result
+            };
+
         } catch(err) {
-            if (client) client.close();
             throw new ExpressError(err.message, err.status || 500);
+        } finally {
+            client.close();
         }
     }
 
@@ -281,7 +312,6 @@ class User {
             throw new ExpressError(err.message, err.status || 500);
         }
     }
-
      
     /** Take password string and return new hashed password
      * 
