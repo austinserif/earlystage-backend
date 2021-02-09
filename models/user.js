@@ -100,9 +100,9 @@ class User {
             };
 
 
-            // return any contents of our resultObject accumulator in addition the results of our user query
+            // return any contents of our returnObject accumulator in addition the results of our user query
             return {
-                ...resultObject,
+                ...returnObject,
                 ...result
             };
 
