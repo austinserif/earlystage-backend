@@ -15,8 +15,11 @@ class Question {
     static async getById(questionId) {
         const [ db, client ] = await getConnection();
         try {
+
+            const query = { _id: new ObjectID(questionId) };
+
             //get cursor from database find query
-            const cursor = await db.collection('questions').find({_id: new ObjectID(questionId)});
+            const cursor = await db.collection('questions').find(query);
 
             //destructure result object from `cursor.toArray` method 
             const objArray = await cursor.toArray();
@@ -44,9 +47,14 @@ class Question {
     static async getAllQuestions(email) {
         const [ db, client ] = await getConnection();
         try {
-            const cursor = await db.collection('questions').find(
-                { $or: [ {userEmail: {$eq: email}}, {isPreset: {$eq: true}} ] }
-            )
+            const query = { $or: [ {userEmail: {$eq: email}}, {isPreset: {$eq: true}} ] }; // filters for all questions either preset or added by user
+            const options = {
+                // sort returned documents in ascending order by title (A->Z)
+                sort: { category: 1 },
+              // Include only the `title` and `imdb` fields in each returned document
+                projection: {},
+              };
+            const cursor = await db.collection('questions').find(query, options);
 
             const result = await cursor.toArray();
 
@@ -72,7 +80,7 @@ class Question {
      * @param {*} email 
      * @param {*} isPreset 
      */
-    static async new(question, category, email, isPreset) {
+    static async new(question, category, email, isPreset, answerType=null) {
         const [ db, client ] = await getConnection();
         try {
             //create new question document from inputs
