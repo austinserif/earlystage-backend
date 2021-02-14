@@ -1,6 +1,7 @@
 const express = require('express');
 const ExpressError = require('../helpers/ExpressError');
 
+const Workspace = require('../models/workspace')
 const User = require('../models/user');
 const Component = require('../models/component');
 const jsonschema = require('jsonschema');
@@ -32,6 +33,16 @@ router.post('/:email/workspaces/:workspaceId/components', authorizeCertainUser, 
         //return the result
         return response.json(result);
 
+    } catch(err) {
+        return next(err);
+    }
+});
+
+router.get('/:email/workspaces/:workspaceId/components', async function(request, response, next) {
+    try {
+        const { workspaceId, email } = request.params; // gets params from request object
+        const result = await Workspace.getAllWorkspaceData(workspaceId, email);
+        return response.json(result); 
     } catch(err) {
         return next(err);
     }
