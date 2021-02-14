@@ -3,7 +3,8 @@ const Question = require('../models/question');
 const { authorizeCertainUser, authorizeAdmin } = require('../middleware/route-protection');
 const router = express.Router();
 
-
+/**
+ */
 router.get('/:email/questions/:questionId', authorizeCertainUser, async function(request, response, next) {
     try {
         //get questionId from params
@@ -32,10 +33,10 @@ router.post('/:email/questions', async function(request, response, next) {
         const { email } = request.params;
 
         //get question and category strings from request body
-        const { question, category } = request.body;
+        const { question, category, answerType } = request.body;
 
         //get new question object 
-        const result = await Question.new(question, category, email, isPreset=false);
+        const result = await Question.new(question, category, email, false);
 
         //return new object
         return response.json(result);
