@@ -86,12 +86,10 @@ class Workspace {
     static async getById(workspaceId, email) {
         const [ db, client ] = await getConnection();
         try {
-            const cursor = await db.collection('workspaces').find(workspaceId);
+            const _id = new ObjectID(workspaceId); // constructs ObjectID type from string
+            const cursor = await db.collection('workspaces').find({ _id: { $eq: _id } }); // find workspace associated with a given id
             const [ result ] = await cursor.toArray();
             const { userEmail } = result;
-
-            console.log(userEmail);
-            console.log(email);
 
             if (userEmail === email) {
                 return result;
@@ -100,9 +98,43 @@ class Workspace {
             }
         } catch(err) {
             throw new ExpressError(err.message, err.status || 500);
+        } finally {
+            client.close();
         }
+    }
 
-        finally {
+    static async getAllWorkspaceData(workspaceId, email) {
+        const [db, client] = await getConnection(); // initializes the database connection
+        try {
+            const _id = new ObjectID(workspaceId); // generates object id from string
+            const cursor = await db.collection('workspaces').find({ _id: { $eq: _id } }); // executes query
+            const [ result ] = await cursor.toArray();
+            const { userEmail, components } = result; // extracts userEmail for verification and components for later
+
+            // checks that this user is allowed to access this piece
+            if (userEmail !== email) {
+                // throws error if not allowed here
+                throw new ExpressError('Unauthorized: you can only view your own workspaces', 401);
+            };
+
+            // queries component collection for any item whose _id is contained in the passed array
+            const componentsCursor = await db.collection('components').find({
+                _id: {
+                    $in: [
+                        ...components
+                    ]
+                }
+            });
+
+            const componentArray = await componentsCursor.toArray(); // converts second cursor object to an array
+            return componentArray; // returns the array
+
+
+        } catch(err) {
+            // handles errors
+            throw new ExpressError(err.message, err.status || 500);
+        } finally {
+            // closes client
             client.close();
         }
     }
