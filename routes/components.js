@@ -64,7 +64,9 @@ router.patch('/:email/workspaces/:workspaceId/components/:componentId', async fu
     try {
         const { workspaceId, componentId, email } = request.params;
 
-        const { updates } = request.body;
+        // current workaround line to check if value is a string before attempting to parse
+        // error was getting thrown when user attempts to go out to the 
+        const updates = (typeof request.body.updates === 'string' ? JSON.parse(request.body.updates) : request.body.updates);
 
         await Component.update(workspaceId, componentId, email, updates);
 
