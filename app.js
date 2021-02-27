@@ -21,7 +21,7 @@ app.use(cors());
 
 app.use(authenticate);
 
-//include abstracçted routes here
+//include abstracted routes here
 const users = require('./routes/users');
 const auth = require('./routes/auth');
 
