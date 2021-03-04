@@ -4,7 +4,7 @@ const Workspace = require('./workspace');
 const Question = require('./question');
 const { updateCollection, updateCollectionArray } = require('../helpers/updateCollection');
 const ExpressError = require('../helpers/ExpressError');
-const ObjectID = require('bson');
+const { ObjectID } = require('bson');
 
 class Component {
     /**
@@ -16,7 +16,6 @@ class Component {
     static async new(email, questionId, workspaceId, answer) {
         const [ db, client ] = await getConnection();
         try {
-
             //verify that workspace exists AND belongs to user associated with input email
             await Workspace.getById(workspaceId, email); //if false throw error
 
@@ -60,7 +59,8 @@ class Component {
         const [ db, client ] = await getConnection();
         try {
             //find requested component and return result from cursor
-            const cursor = await db.collection('components').find(componentId);
+            const query = { _id: new ObjectID(componentId) };
+            const cursor = await db.collection('components').find(query);
             const [ result ] = await cursor.toArray();
 
             //throw error if id doesn't yield anything
@@ -123,32 +123,30 @@ class Component {
     static async delete(email, workspaceId, componentId) {
         const [ db, client ] = await getConnection();
         try {
-
-            //verify workspace and email realtionship            
-            await Workspace.getById(workspaceId, email);
-
-            //verify component workspace component
+            //verify component workspace component relationship
             await Component.getById(workspaceId, componentId)
 
-            //execute deletion
-            const result = await db.collection('components').removeOne({_id: new ObjectID(componentId)});
+            // verify workspace compnoent relationship -- is this over the top?
+            await Workspace.getById(workspaceId, email);
+
+            const encodedComponentId = new ObjectID(componentId);
+
+            await db.collection('components').removeOne({_id: encodedComponentId});
 
             await db.collection('workspaces').updateOne(
-                {_id: new ObjectID(workspaceId)},
-                { $pull: { components: componentId}}
+                { _id: {$eq: new ObjectID(workspaceId)} },
+                { $pull: { components: encodedComponentId} }
             );
 
             //return confirmation
 
         } catch(err) {
             throw new ExpressError(err.message, err.status || 500);
-        }
-
-        finally {
+        } finally {
             client.close();
         }
     }
 }
 
 
-module.exports = Component;
+module.exports = Component;;
