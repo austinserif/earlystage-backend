@@ -63,7 +63,11 @@ class User {
 
 
             //retrieve resource 
-            const result = await db.collection('users').findOne({ email: { $eq: email} });
+            const query = { email: { $eq: email } }; // query statement
+            const cursor = await db.collection('users').find(query); // database operation
+            const [ result ] = await cursor.toArray(); // destructures result
+
+            if (!result) throw new ExpressError('No user was found', 404);
 
             if (allData) {
                 if (result.workspaces && result.workspaces.length > 0) {

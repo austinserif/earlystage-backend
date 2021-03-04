@@ -15,7 +15,6 @@ class Question {
     static async getById(questionId) {
         const [ db, client ] = await getConnection();
         try {
-
             const query = { _id: new ObjectID(questionId) };
 
             //get cursor from database find query
