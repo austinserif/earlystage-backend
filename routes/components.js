@@ -1,14 +1,7 @@
 const express = require('express');
-const ExpressError = require('../helpers/ExpressError');
-
 const Workspace = require('../models/workspace')
-const User = require('../models/user');
 const Component = require('../models/component');
-const jsonschema = require('jsonschema');
-const { validateNewUser, validateUpdatedUser } = require('../middleware/schema-validation');
-const bcrypt = require('bcrypt');
-const { BCRYPT_WORK_FACTOR } = require('../config');
-const { authorizeCertainUser, authorizeAdmin } = require('../middleware/route-protection');
+const { authorizeCertainUser } = require('../middleware/route-protection');
 const router = express.Router();
 
 
@@ -83,7 +76,7 @@ router.delete('/:email/workspaces/:workspaceId/components/:componentId', async f
         await Component.delete(email, workspaceId, componentId);
 
         return response.json({message: "Resource deleted"});
-    } catch {
+    } catch(err) {
         return next(err);
     }
 });
