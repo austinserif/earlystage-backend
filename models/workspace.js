@@ -82,13 +82,19 @@ class Workspace {
     /** takes a workspace id and email and returns object if database contains 
      * an object corresponding to the given id that also contains an email property value
      * matching the email argument.
+     * 
+     * @param {String} workspaceId
+     * @param {String} email
      */
     static async getById(workspaceId, email) {
         const [ db, client ] = await getConnection();
         try {
-            const _id = new ObjectID(workspaceId); // constructs ObjectID type from string
-            const cursor = await db.collection('workspaces').find({ _id: { $eq: _id } }); // find workspace associated with a given id
+            const query = { _id: { $eq: new ObjectID(workspaceId) } };
+            const cursor = await db.collection('workspaces').find(query); // find workspace associated with a given id
             const [ result ] = await cursor.toArray();
+
+            if (!result) throw new ExpressError('No workspace was found for the give id', 404);
+
             const { userEmail } = result;
 
             if (userEmail === email) {
@@ -109,6 +115,9 @@ class Workspace {
             const _id = new ObjectID(workspaceId); // generates object id from string
             const cursor = await db.collection('workspaces').find({ _id: { $eq: _id } }); // executes query
             const [ result ] = await cursor.toArray();
+
+            if (!result) throw new ExpressError('Either the workspaceId or email are undefined', 404);
+
             const { userEmail, components } = result; // extracts userEmail for verification and components for later
 
             // checks that this user is allowed to access this piece
@@ -145,11 +154,13 @@ class Workspace {
             //will throw error if not authorized
             await Workspace.getById(workspaceId, email);
 
-            const result = await db.collection('workspaces').removeOne({_id: new ObjectID(workspaceId)});
+            const encodedWorkspaceId = new ObjectID(workspaceId);
+
+            const result = await db.collection('workspaces').removeOne({_id: encodedWorkspaceId});
 
             await db.collection('users').updateOne(
-                {email},
-                { $pull: { workspaces: workspaceId}}
+                { email: {$eq: email} },
+                { $pull: { workspaces: encodedWorkspaceId} }
             );
 
             //return result
