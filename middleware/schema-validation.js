@@ -3,7 +3,6 @@ const updateUserSchema = require('../schema/user/updateUser.json')
 const updateWorkspaceSchema = require('../schema/workspace/updateWorkspace.json');
 const jsonschema = require('jsonschema');
 const ExpressError = require('../helpers/ExpressError');
-const showFirstError = require('../helpers/showFirstError');
 
 /** 
  * Validate data in client request body with json schema
