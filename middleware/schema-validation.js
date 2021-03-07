@@ -3,6 +3,7 @@ const updateUserSchema = require('../schema/user/updateUser.json')
 const updateWorkspaceSchema = require('../schema/workspace/updateWorkspace.json');
 const jsonschema = require('jsonschema');
 const ExpressError = require('../helpers/ExpressError');
+const showFirstError = require('../helpers/showFirstError');
 
 /** 
  * Validate data in client request body with json schema
@@ -11,14 +12,13 @@ const ExpressError = require('../helpers/ExpressError');
 function validateNewUser(request, response, next) {
     try {
         const { email, name, password } = request.body;
-
         const result = jsonschema.validate({ email, name, password }, userSchema);
 
         if (result.errors.length) {
           // pass a 400 error to the error-usernamer
           let listOfErrors = result.errors.map(err => err.stack);
           const err = new ExpressError(listOfErrors, 400);
-          return next(err);
+          throw err;
         }
         return next();
     } catch(err) {
@@ -42,7 +42,6 @@ function validateUpdatedUser(request, response, next) {
             // pass a 400 error to the error-usernamer
             let listOfErrors = result.errors.map(err => err.stack);
             const err = new ExpressError(listOfErrors, 400);
-            console.log(result);
             return next(err); 
         }
 
