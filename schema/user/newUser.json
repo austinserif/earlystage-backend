@@ -24,6 +24,7 @@
             "title": "The email schema",
             "description": "User's email. This is both their unique user identifier, as well as primary method of community and verification.",
             "default": "",
+            "format": "email",
             "examples": [
                 "jappleseed@gmail.com"
             ]
@@ -31,9 +32,11 @@
         "name": {
             "$id": "#/properties/name",
             "type": "string",
+            "minLength": 2,
             "title": "The name schema",
             "description": "A user's prefered identification string. Has no requirements except for length > 1.",
             "default": "",
+
             "examples": [
                 "Johnny",
                 "Johnny Appleseed",
@@ -46,6 +49,7 @@
             "title": "The password schema",
             "description": "User's own secret key used for logging in",
             "default": "",
+            "minLength": 6,
             "examples": [
                 "password123456"
             ]

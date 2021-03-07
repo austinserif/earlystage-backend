@@ -21,7 +21,9 @@ class ExpressError extends Error {
     super();
     this.message = message;
     this.status = status;
-    console.error(this.stack);
+    
+    // read out in non-testing envs
+    process.env.NODE_ENV !== 'test' ?? console.error(this.stack);
   }
 }
   
