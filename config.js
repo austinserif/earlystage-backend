@@ -9,7 +9,7 @@ let DB_URI;
 
 if (process.env.NODE_ENV === "test") {
   DB_URI = process.env.TEST_DB_URI;
-  DB_NAME = process.env.TEST_DB_URI;
+  DB_NAME = process.env.TEST_DB_NAME;
 } else {
   DB_URI = process.env.DB_URI;
   DB_NAME = process.env.DB_NAME;
