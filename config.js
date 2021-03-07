@@ -8,8 +8,8 @@ const PORT = +process.env.PORT || 3000;
 let DB_URI;
 
 if (process.env.NODE_ENV === "test") {
-  DB_URI = "mongodb://127.0.0.1:27017";
-  DB_NAME = "earlystage-due-diligence-test";
+  DB_URI = process.env.TEST_DB_URI;
+  DB_NAME = process.env.TEST_DB_URI;
 } else {
   DB_URI = process.env.DB_URI;
   DB_NAME = process.env.DB_NAME;
