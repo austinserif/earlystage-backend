@@ -4,7 +4,8 @@
  */
 const mock = (function() {
     let count = 0;
-    const buildPassword = () => new String(Math.floor(Math.random() * 10000));
+    const uids = [];
+    const buildPassword = () => new String(`password${Math.floor(Math.random() * 100)}`);
     const buildName = () => new String(`Test User${count}`);
     const buildEmail = () => new String(`testUser${count}@gmail.com`);
 
@@ -14,11 +15,28 @@ const mock = (function() {
          * -> {name, email, password} representing a fake user
          */
         createFakeUser() {
+            let token = null;
+            let hasUid = false;
             count++; // iterate count
             return {
                 name: buildName(),
                 email: buildEmail(),
-                password: buildPassword()
+                password: buildPassword(),
+                setToken(_token) {
+                    token = _token;
+                },
+                getToken() {
+                    return token;
+                },
+                clearToken() {
+                    token = null;
+                },
+                setUid(uid) {
+                    if (!hasUid) {
+                        uids.push(uid);
+                        hasUid = true;                        
+                    }
+                }
             }
         },
         /**
@@ -26,6 +44,9 @@ const mock = (function() {
          */
         getCount() {
             return count;
+        },
+        getUids() {
+            return uids;
         }
     }
 })();
