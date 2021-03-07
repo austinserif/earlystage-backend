@@ -46,6 +46,32 @@ class User {
         }
     }
 
+    /**
+     * Takes an email string as only arguement and returns a boolean value
+     * depending on whether a user exists in the database corresponding input
+     * 
+     * @param {String} email 
+     */
+    static async exists(email) {
+        // establish connection with server
+        const [db, client] = await getConnection();
+        try {
+            //retrieve resource 
+            const query = { email: { $eq: email } }; // query statement
+            const cursor = await db.collection('users').find(query); // database operation
+            const [ result ] = await cursor.toArray(); // destructures result
+
+            // return false (that the there is no existing user related to passed email) if !result, else return true
+            return !result ? false : true;
+        } catch (err) {
+            // throw internal server error
+            throw new ExpressError(err.message, 500);
+        } finally {
+            // close connection to db client
+            client.close();
+        }
+    }
+
     /** pass in an email and get back corresponding user object if exists, otherwise
      *  return null
      * 
@@ -139,7 +165,7 @@ class User {
         
         try {
             //derive boolean from result
-            const alreadyInUse = !!(await User.getUserByEmail(email));
+            const alreadyInUse = await User.exists(email);
 
             //throw error if true (that there is already a user with that email)
             if (alreadyInUse) throw new ExpressError('The email you chose is already in use', 409);
