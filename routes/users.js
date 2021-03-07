@@ -9,6 +9,7 @@ const { authorizeCertainUser, authorizeAdmin } = require('../middleware/route-pr
 const workspaces = require('./workspaces');
 const questions = require('./questions');
 const components = require('./components');
+
 router.use(questions);
 router.use(workspaces);
 router.use(components);
@@ -58,7 +59,7 @@ router.post('/', validateNewUser, async function(request, response, next) {
         const successMsg = await User.createNewUser({ name, email, password });
 
         //return response with success msg
-        return response.json(successMsg).status(201);
+        return response.status(201).json(successMsg);
     } catch(err) {
         return next(err);
     }
