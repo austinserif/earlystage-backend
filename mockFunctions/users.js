@@ -1,3 +1,5 @@
+const { createUserDocument, createWorkspaceDocument } = require('../helpers/createDocument');
+
 /**
  * Returns an Object containing a suite of functions for mocking user
  * @returns {Object}
@@ -15,13 +17,25 @@ const mock = (function() {
          * -> {name, email, password} representing a fake user
          */
         createFakeUser() {
+            let wids = [];
+            let qids = [];
+
             let token = null;
+
             let hasUid = false;
-            count++; // iterate count
+            let uid;
+
+            count++; // iterate count -- should execute before the bulid functions are called below (to make sure count starts at 1)
+
+            let name = buildName();
+            let email = buildEmail();
+            let password = buildPassword();
+
+            
             return {
-                name: buildName(),
-                email: buildEmail(),
-                password: buildPassword(),
+                name,
+                email,
+                password,
                 setToken(_token) {
                     token = _token;
                 },
@@ -31,14 +45,36 @@ const mock = (function() {
                 clearToken() {
                     token = null;
                 },
-                setUid(uid) {
+                setUid(myUid) {
                     if (!hasUid) {
+                        uid = myUid;
                         uids.push(uid);
                         hasUid = true;                        
                     }
+                },
+                createFakeWorkspace(name, domain) {
+                    const fakeDocument = createWorkspaceDocument({ email, name, domain });
+                    return fakeDocument;
+                },
+                createFakeUserDocument() {
+                    const fakeDocument = createUserDocument({ name, email, password, isAdmin: false, verificationCode: 1234 })
+                    return fakeDocument;
+                },
+                setWid(id) {
+                    wids.push(id);
+                },
+                getWids() {
+                    return wids;
+                },
+                setQid(id) {
+                    qids.push(id);
+                },
+                getQids() {
+                    return qids;
                 }
             }
         },
+
         /**
          * Returns the number of generated users
          */
@@ -47,6 +83,12 @@ const mock = (function() {
         },
         getUids() {
             return uids;
+        },
+        async collectionInsert(db, collectionName, document) {
+            try {
+                const result = await db.collection(collectionName).insertOne(document);
+                return result.insertedId;
+            } finally {}
         }
     }
 })();
