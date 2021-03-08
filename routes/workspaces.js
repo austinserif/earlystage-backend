@@ -50,7 +50,7 @@ router.post('/:email/workspaces', authorizeCertainUser, async function(request, 
         const { email } = request.params;
         const { name, domain } = request.body;
         const res = await Workspace.new(email, { name, domain });
-        return response.json(res);
+        return response.status(201).json(res); // return response with 201 status code if resource created sucessfully
     } catch(err) {
         return next(err);
     }
