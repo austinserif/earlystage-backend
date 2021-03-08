@@ -61,9 +61,6 @@ const updateCollectionArray = async (collectionName, arrayPath, resource, target
                 }
             }
         );
-
-        console.log(result);
-
         return result;
 
     } catch (err) {
