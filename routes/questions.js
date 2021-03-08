@@ -39,7 +39,7 @@ router.post('/:email/questions', async function(request, response, next) {
         const result = await Question.new(question, category, email, false);
 
         //return new object
-        return response.json(result);
+        return response.status(201).json(result);
 
     } catch(err) {
         return next(err);

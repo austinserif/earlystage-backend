@@ -24,7 +24,7 @@ router.post('/:email/workspaces/:workspaceId/components', authorizeCertainUser, 
         const result = await Component.new(email, questionId, workspaceId, answer);
 
         //return the result
-        return response.json(result);
+        return response.status(201).json(result);
 
     } catch(err) {
         return next(err);
