@@ -23,7 +23,9 @@ class ExpressError extends Error {
     this.status = status;
     
     // read out in non-testing envs
-    process.env.NODE_ENV !== 'test' ?? console.error(this.stack);
+    if (process.env.NODE_ENV !== 'test') {
+      console.error(this.stack);
+    }
   }
 }
   
