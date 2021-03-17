@@ -42,7 +42,9 @@ app.use(function(err, request, response, next) {
   response.status(err.status || 500);
 
   // only log stack errors in a dev or production env
-  process.env.NODE_ENV !== 'test' ?? console.error(err.stack);
+  if (process.env.NODE_ENV !== 'test') {
+    console.error(err.stack);
+  }
 
   return response.json({
     status: err.status,
