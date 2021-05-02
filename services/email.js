@@ -1,6 +1,5 @@
 const Mailgun = require("mailgun-js");
 
-
 /**
  * Function closure wraps the Mailgun API
  * and defines functions for handling basic
@@ -9,44 +8,51 @@ const Mailgun = require("mailgun-js");
 export default async function () {
     try {
 
-        // fetch api key and sender domain info from env vars
-        // rename variables
+        // get api keys from environment vars and rename
         const { SENDER_DOMAIN: apiKey, MAILGUN_API_KEY: domain } = process.env;
 
         // create new instance of a mailgun object
         const mg = Mailgun({ apiKey, domain });
 
-    } catch (err) {
+        // begin return object with function definitions
+        return {
+            /**
+             * Sends an email from 
+             * 
+             * @param {String} recipient email url of recipient
+             * @param {String} subject subject line
+             * @param {String} text email body
+             */
+            send: async function (recipient, subject, text) {
+                try {
+                    // defines key data fields for out going message
+                    const data = {
+                        from: `Mailgun Sandbox <postmaster@${SENDER_DOMAIN}>`,
+                        to: recipient,
+                        subject,
+                        text
+                    };
 
-    } finally {
+                    // 
+                    const result = await mg.messages().send(data, function (error, body) {
+                        if (error) {
+                            throw new Error(error);
+                        }
 
-    }
-}
+                        console.log(body);
+                    });
 
-class Email {
-    static async send(recipient, subject, text) {
-        try {
-            const data = {
-                from: `Mailgun Sandbox <postmaster@${SENDER_DOMAIN}>`,
-                to: recipient,
-                subject,
-                text
-            };
+                    // return result of the message-send request
+                    return result;
 
-            const result = await mg.messages().send(data, function (error, body) {
-                if (error) {
-                    console.error(error);
+                } catch(err) {
+                    // handle errors
+                    throw new Error(err);
                 }
-
-                console.log(body);
-            });
-
-            return result;
-
-        } catch(err) {
-            
+            }
         }
+    } catch (err) {
+        // handle errors with setting up email
+        throw new Error(err);
     }
 }
-
-module.exports = Email;
