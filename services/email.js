@@ -17,7 +17,9 @@ export default async function () {
         // begin return object with function definitions
         return {
             /**
-             * Sends an email from 
+             * Sends an email from postmaster email url to a specified `recipient`;
+             * message contains `subject` line and `text` body values that are passed
+             * as args.
              * 
              * @param {String} recipient email url of recipient
              * @param {String} subject subject line
