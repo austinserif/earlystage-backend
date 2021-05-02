@@ -3,13 +3,14 @@ const { send } = require('../services/email');
 class Email {
     static async sendCreateAccountLink (email) {
         try {
-            // build unique URL
+            // check email against database
 
-            // build message body
+            // if email is associated with an active account, throw an error
 
-            // build subject line
+            // if email is associated with an unfinished registration generate a url and send email
 
-            // send email
+            // if email is unique and valid, generate a url and send email
+
         } catch (err) {
             // handle errors
         }
