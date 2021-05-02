@@ -1,7 +1,27 @@
 const Mailgun = require("mailgun-js");
-const { SENDER_DOMAIN, MAILGUN_API_KEY } = process.env;
-const mg = Mailgun({apiKey: MAILGUN_API_KEY, domain: SENDER_DOMAIN});
 
+
+/**
+ * Function closure wraps the Mailgun API
+ * and defines functions for handling basic
+ * mail operations such as `send`.
+ */
+export default async function () {
+    try {
+
+        // fetch api key and sender domain info from env vars
+        // rename variables
+        const { SENDER_DOMAIN: apiKey, MAILGUN_API_KEY: domain } = process.env;
+
+        // create new instance of a mailgun object
+        const mg = Mailgun({ apiKey, domain });
+
+    } catch (err) {
+
+    } finally {
+
+    }
+}
 
 class Email {
     static async send(recipient, subject, text) {
