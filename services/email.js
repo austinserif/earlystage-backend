@@ -25,6 +25,7 @@ export default async function () {
              */
             send: async function (recipient, subject, text) {
                 try {
+
                     // defines key data fields for out going message
                     const data = {
                         from: `Mailgun Sandbox <postmaster@${SENDER_DOMAIN}>`,
@@ -33,17 +34,13 @@ export default async function () {
                         text
                     };
 
-                    // 
-                    const result = await mg.messages().send(data, function (error, body) {
+                    // executes request to send message via the mailgun API
+                    await mg.messages().send(data, function (error, body) {
+                        // stamps identifier on error message
                         if (error) {
-                            throw new Error(error);
+                            throw new Error(`ERROR THROWN WHILE SENDING MESSAGE: ${error.message}`);
                         }
-
-                        console.log(body);
                     });
-
-                    // return result of the message-send request
-                    return result;
 
                 } catch(err) {
                     // handle errors
