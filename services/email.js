@@ -1,32 +1,55 @@
 const Mailgun = require("mailgun-js");
-const { SENDER_DOMAIN, MAILGUN_API_KEY } = process.env;
-const mg = Mailgun({apiKey: MAILGUN_API_KEY, domain: SENDER_DOMAIN});
 
+/**
+ * Function closure wraps the Mailgun API
+ * and defines functions for handling basic
+ * mail operations such as `send`.
+ */
+export default async function () {
+    try {
 
-class Email {
-    static async send(recipient, subject, text) {
-        try {
-            const data = {
-                from: `Mailgun Sandbox <postmaster@${SENDER_DOMAIN}>`,
-                to: recipient,
-                subject,
-                text
-            };
+        // get api keys from environment vars and rename
+        const { SENDER_DOMAIN: apiKey, MAILGUN_API_KEY: domain } = process.env;
 
-            const result = await mg.messages().send(data, function (error, body) {
-                if (error) {
-                    console.error(error);
+        // create new instance of a mailgun object
+        const mg = Mailgun({ apiKey, domain });
+
+        // begin return object with function definitions
+        return {
+            /**
+             * Sends an email from 
+             * 
+             * @param {String} recipient email url of recipient
+             * @param {String} subject subject line
+             * @param {String} text email body
+             */
+            send: async function (recipient, subject, text) {
+                try {
+
+                    // defines key data fields for out going message
+                    const data = {
+                        from: `Mailgun Sandbox <postmaster@${SENDER_DOMAIN}>`,
+                        to: recipient,
+                        subject,
+                        text
+                    };
+
+                    // executes request to send message via the mailgun API
+                    await mg.messages().send(data, function (error, body) {
+                        // stamps identifier on error message
+                        if (error) {
+                            throw new Error(`ERROR THROWN WHILE SENDING MESSAGE: ${error.message}`);
+                        }
+                    });
+
+                } catch(err) {
+                    // handle errors
+                    throw new Error(err);
                 }
-
-                console.log(body);
-            });
-
-            return result;
-
-        } catch(err) {
-            
+            }
         }
+    } catch (err) {
+        // handle errors with setting up email
+        throw new Error(err);
     }
 }
-
-module.exports = Email;
