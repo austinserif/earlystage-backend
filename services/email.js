@@ -5,7 +5,7 @@ const Mailgun = require("mailgun-js");
  * and defines functions for handling basic
  * mail operations such as `send`.
  */
-export default async function () {
+export default function () {
     try {
 
         // get api keys from environment vars and rename
