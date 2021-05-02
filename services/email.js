@@ -5,7 +5,7 @@ const Mailgun = require("mailgun-js");
  * and defines functions for handling basic
  * mail operations such as `send`.
  */
-export default async function () {
+exports = function email () {
     try {
 
         // get api keys from environment vars and rename
@@ -17,7 +17,9 @@ export default async function () {
         // begin return object with function definitions
         return {
             /**
-             * Sends an email from 
+             * Sends an email from postmaster email url to a specified `recipient`;
+             * message contains `subject` line and `text` body values that are passed
+             * as args.
              * 
              * @param {String} recipient email url of recipient
              * @param {String} subject subject line
@@ -52,4 +54,4 @@ export default async function () {
         // handle errors with setting up email
         throw new Error(err);
     }
-}
+}();
