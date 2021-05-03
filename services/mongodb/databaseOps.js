@@ -1,5 +1,5 @@
 const { mongoClientHandler } = require('./connect');
-const ExpressError = require('../../ExpressError');
+const ExpressError = require('../../helpers/ExpressError');
 const { ObjectId } = require('bson');
 
 
