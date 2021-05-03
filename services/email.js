@@ -1,18 +1,22 @@
-const Mailgun = require("mailgun-js");
+const formData = require('form-data');
+const Mailgun = require('mailgun.js');
+const axios = require('axios');
+
+
+const ExpressError = require('../helpers/ExpressError');
+const { 
+    SENDER_DOMAIN, 
+    MAILGUN_BASE_URL, 
+    MAILGUN_SENDING_KEY 
+} = require('../config');
 
 /**
  * Function closure wraps the Mailgun API
  * and defines functions for handling basic
  * mail operations such as `send`.
  */
-exports = function email () {
+function email () {
     try {
-
-        // get api keys from environment vars and rename
-        const { SENDER_DOMAIN: apiKey, MAILGUN_API_KEY: domain } = process.env;
-
-        // create new instance of a mailgun object
-        const mg = Mailgun({ apiKey, domain });
 
         // begin return object with function definitions
         return {
@@ -25,33 +29,39 @@ exports = function email () {
              * @param {String} subject subject line
              * @param {String} text email body
              */
-            send: async function (recipient, subject, text) {
+            send: async function ({ recipient, subject, text }) {
                 try {
-
-                    // defines key data fields for out going message
-                    const data = {
-                        from: `Mailgun Sandbox <postmaster@${SENDER_DOMAIN}>`,
-                        to: recipient,
-                        subject,
-                        text
-                    };
-
-                    // executes request to send message via the mailgun API
-                    await mg.messages().send(data, function (error, body) {
-                        // stamps identifier on error message
-                        if (error) {
-                            throw new Error(`ERROR THROWN WHILE SENDING MESSAGE: ${error.message}`);
+                    // axios configuration object for post request
+                    const config = {
+                        method: "POST",
+                        url: `${MAILGUN_BASE_URL}v3/${SENDER_DOMAIN}/messages`,
+                        params: {
+                            from: `Mailgun Sandbox <postmaster@${SENDER_DOMAIN}>`,
+                            to: recipient,
+                            subject,
+                            text
+                        },
+                        auth: {
+                            username: "api",
+                            password: MAILGUN_SENDING_KEY
                         }
-                    });
+                    }
 
-                } catch(err) {
-                    // handle errors
-                    throw new Error(err);
+                    // executes the request and stores response in variable
+                    const response = await axios(config);
+
+                    // returns function with response
+                    return response;
+                } catch (err) {
+                    // handles any thrown errors
+                    throw new ExpressError(err.message, err.status || 500);
                 }
             }
         }
     } catch (err) {
         // handle errors with setting up email
-        throw new Error(err);
+        throw new ExpressError(err.message, err.status || 500);
     }
-}();
+};
+
+module.exports = email;
