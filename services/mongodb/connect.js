@@ -1,7 +1,7 @@
 /** Contains logic for creating instance of mongodb connection */
 const { MongoClient } = require('mongodb');
 const { DB_URI, DB_NAME } = require('../../config');
-const ExpressError = require('../../ExpressError');
+const ExpressError = require('../../helpers/ExpressError');
 
 
 /**
