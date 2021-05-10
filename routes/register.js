@@ -1,3 +1,6 @@
+const express = require('express');
+const router = express.Router();
+
 /** POST /register
  * 
  * Takes an email string as a query string parameter
