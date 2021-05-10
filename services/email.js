@@ -1,5 +1,3 @@
-const formData = require('form-data');
-const Mailgun = require('mailgun.js');
 const axios = require('axios');
 
 
