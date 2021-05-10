@@ -24,10 +24,12 @@ app.use(authenticate);
 //include abstracted routes here
 const users = require('./routes/users');
 const auth = require('./routes/auth');
+const register = require('./routes/register')
 
 //"use" those routes here
 app.use('/login', auth);
 app.use('/users', users);
+app.use('/register', register);
 
 /** 404 handler */
 app.use(function(request, response, next) {
