@@ -1,6 +1,4 @@
 const axios = require('axios');
-
-
 const ExpressError = require('../helpers/ExpressError');
 const { 
     SENDER_DOMAIN, 
