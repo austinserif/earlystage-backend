@@ -3,16 +3,12 @@
  * a json schema that includes other necessary fields for later on in 
  * the userflow
  */
-const createUserDocument = ({ name, email, password, isAdmin, verificationCode }) => {
+const createUserDocument = ({ email, isAdmin }) => {
     const now = new Date();
     return {
         email,
         account: {
-            name,
-            password,
-            // isVerified: false,
-            isVerified: true, // temporary patch to verify all new users until mailgun is working again
-            verificationCode,
+            isVerified: false,
             isAdmin,
         },
         workspaces: [],

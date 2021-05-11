@@ -6,7 +6,8 @@ const ExpressError = require('../helpers/ExpressError');
 const { createUserDocument } = require('../helpers/createDocument');
 const jwt = require('jsonwebtoken');
 const generateVerificationCode = require('../helpers/generateVerificationCode');
-const Email = require('../services/email');
+const databaseOps = require('../services/mongodb/databaseOps');
+const Email = require('../models/email');
 
 /** collection name constant */
 const COLLECTION = "users";
@@ -204,6 +205,60 @@ class User {
 
         finally {
             client.close();
+        }
+    }
+
+    static async createNewAccount (email) {
+        try {
+            // establish connection with database client
+            const usersOps = await databaseOps('users');
+
+            // query database for account associated with the passed email
+            // getPage returns an array, but since we are looking or a single item
+            // we assign the variable `account` to the element at 0th array index
+            const [ account ] = await usersOps.getPage({ email }, {}, 1, 1, false);
+
+            // if no account found matching email, create an inactive account and generate a registration key
+            if (account === undefined) {
+                // create new user document
+                const newAccount = createUserDocument({ email, isAdmin: false });
+
+                // insert doc into user database and store result
+                const result = await usersOps.setResources([ newAccount ]);
+
+                // get `insertedIds` array from `result <InsertWriteOpResult>`
+                const { insertedIds } = result;
+
+                // get id of inserted doc
+                const _id = insertedIds['0'];
+
+                // send confirmation email
+                const emailResult = await Email.sendCreateAccountLink({ email, _id });
+
+                // return a message object to controller to send back to client
+                return {
+                    message: {
+                        header: 'Success!',
+                        paragraph: 'To activate your account, check your email inbox for a link to complete your registration'
+                    }
+                }
+
+            } else if (account && account.account.isVerified === false) {
+                // TODO: 
+                // send a new email link
+                // return a message object to controller to send back to client
+                return {
+                    message: {
+                        header: "Account created, but inactive",
+                        paragraph: "It seems that this email is already associated with an account, but that account is inactive. To finish creating your account, find the email verification message in your inbox and follow the instructions."
+                    }
+                }
+            } else {
+                // throw an error 
+                throw new ExpressError('An active user is already associated with this email!', 400);
+            }
+        } catch (err) {
+            throw new ExpressError(err.message, err.status || 500);
         }
     }
 
