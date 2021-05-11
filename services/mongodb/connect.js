@@ -49,7 +49,7 @@ async function mongoClientHandler() {
              * client connection
              */
             checkClientConnection() {
-                return !!client;
+                return !client ? false : true;
             }
         }        
     } catch (err) {
