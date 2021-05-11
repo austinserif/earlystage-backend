@@ -35,7 +35,7 @@ async function databaseOps(collectionName) {
              * @param {Number} pageNumber sets the maximum number of results to be returned by the array.
              * @param {Number} pageSize determines the number of results to skip before returning a results array.
              */
-            async getPage(query, projection, pageNumber, pageSize) {
+            async getPage(query, projection, pageNumber, pageSize, autoKillSwitch=true) {
                 try {
 
                     // throw error if query or projection are passed non-object args
@@ -76,7 +76,8 @@ async function databaseOps(collectionName) {
                 } catch (err) {
                     throw new ExpressError(err.message, err.status || 500);
                 } finally {
-                    await killSwitch();
+                    // only kill connection if autoKillSwitch is set to true
+                    autoKillSwitch ? await killSwitch() : null;
                 }
             },
             /**
@@ -87,7 +88,7 @@ async function databaseOps(collectionName) {
              * 
              * @param {String} id
              */
-            async getResource(id) {
+            async getResource(id, autoKillSwitch=true) {
                 try {
                     // throws error if input is not a string
                     if (typeof id !== 'string') throw new ExpressError('Input must be a string', 500);
@@ -106,19 +107,20 @@ async function databaseOps(collectionName) {
                 } catch (err) {
                     throw new ExpressError(err.message, err.status || 500);
                 } finally {
-                    await killSwitch();
+                    // only kill connection if autoKillSwitch is set to true
+                    autoKillSwitch ? await killSwitch() : null;
                 }
             },
             /**
              * Takes only one parameter, `documents <Object[]>`, and inserts each
              * item in `document` argument into the collection. The function returns
-             * an integer indicating the number of successfully inserted documents.
+             * the result object.
              * An error is thrown if the argument is not an array, is an empty array,
              * or is an array that contains any items that are not objects.
              * 
              * @param {Object[]} documents
              */
-            async setResources(documents) {
+            async setResources(documents, autoKillSwitch=true) {
                 try {
                     // throw error if documents array is empty or not an array
                     if (!Array.isArray(documents)) throw new ExpressError('Input must be an array', 500);
@@ -133,11 +135,12 @@ async function databaseOps(collectionName) {
                     const result = await collection.insertMany(documents);
 
                     // return the number of inserted items
-                    return result.insertedCount;
+                    return result;
                 } catch (err) {
                     throw new ExpressError(err.message, err.status || 500);
                 } finally {
-                    await killSwitch();
+                    // only kill connection if autoKillSwitch is set to true
+                    autoKillSwitch ? await killSwitch() : null;
                 }
             },
             /**
@@ -148,7 +151,7 @@ async function databaseOps(collectionName) {
              * 
              * @param {String} id 
              */
-            async deleteResource(id) {
+            async deleteResource(id, autoKillSwitch=true) {
                 try {
                     // throws error if input is not a string
                     if (typeof id !== 'string') throw new ExpressError('Input must be a string', 500);
@@ -167,7 +170,8 @@ async function databaseOps(collectionName) {
                 } catch (err) {
                     throw new ExpressError(err.message, err.status || 500);
                 } finally {
-                    await killSwitch();
+                    // only kill connection if autoKillSwitch is set to true
+                    autoKillSwitch ? await killSwitch() : null;
                 }
             },
             /**
@@ -185,8 +189,9 @@ async function databaseOps(collectionName) {
              * in a given document to the field to be modified. The `value` property 
              * contains the information that the described field is going to be 
              * overwritten with.
+             * @param {Boolean} autoKillSwitch optional argument defaults to true, can prevent client disconnect by passing false
              */
-            async updateResource(id, updates) {
+            async updateResource(id, updates, autoKillSwitch=true) {
                 try {
                     // throws error if id input is not a string
                     if (typeof id !== 'string') throw new ExpressError('First parameter must be a string', 500);
@@ -233,7 +238,8 @@ async function databaseOps(collectionName) {
                 } catch (err) {
                     throw new ExpressError(err.message, err.status || 500);
                 } finally {
-                    await killSwitch();
+                    // only kill connection if autoKillSwitch is set to true
+                    autoKillSwitch ? await killSwitch() : null;
                 }
             }
         }
