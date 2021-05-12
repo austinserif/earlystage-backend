@@ -56,14 +56,18 @@ class User {
 
             const result = await getResource(_id);
 
-            // if contains property and is false 
-            if (result && result.account.isVerified === false) {
+            if (!result) {
+                throw new ExpressError('No user is associated with this id', 404);
+            } else if (result.account.isVerified === true) {
+                throw new ExpressError('No unverified user is associated with this account', 404);
+            } else {
                 return {
                     isUnverifiedUser: true
-                }
-            } else {
-                throw new ExpressError('No Unverified user is associated with this id', 404);                
+                }                
             }
+
+
+
         } catch (err) {
             throw new ExpressError(err.message, err.status || 500);
         }
@@ -262,7 +266,7 @@ class User {
     static async createNewAccount (email) {
         try {
             // establish connection with database client
-            const usersOps = await databaseOps('users');
+            const usersOps = await databaseOps(COLLECTION);
 
             // query database for account associated with the passed email
             // getPage returns an array, but since we are looking or a single item
@@ -270,7 +274,7 @@ class User {
             const [ account ] = await usersOps.getPage({ email }, {}, 1, 1, false);
 
             // if no account found matching email, create an inactive account and generate a registration key
-            if (account === undefined) {
+            if (!account) {
                 // create new user document
                 const newAccount = createUserDocument({ email, isAdmin: false });
 
@@ -294,7 +298,7 @@ class User {
                     }
                 }
 
-            } else if (account && account.account.isVerified === false) {
+            } else if (account.account.isVerified === false) {
                 // TODO: 
                 // send a new email link
                 // return a message object to controller to send back to client
