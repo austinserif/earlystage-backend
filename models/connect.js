@@ -21,7 +21,7 @@ const getConnection = async () => {
 
   } catch (err) {
     //read msg to console
-    console.log(err);
+    // console.log(err);
 
     //throw internal error
     throw new ExpressError('There was an error connecting with the server', 500);

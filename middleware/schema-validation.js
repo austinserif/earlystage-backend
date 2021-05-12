@@ -68,7 +68,6 @@ function validateUpdatedWorkspace(request, response, next) {
             // pass a 400 error to the error-usernamer
             let listOfErrors = result.errors.map(err => err.stack);
             const err = new ExpressError(listOfErrors, 400);
-            console.log(result);
             return next(err); 
         }
 

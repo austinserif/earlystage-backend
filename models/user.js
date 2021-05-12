@@ -18,6 +18,57 @@ const COLLECTION = "users";
  */
 class User {
 
+    /** Completes user registration by updating the user's account document with the
+     * newly passed fields.
+     */
+    static async completeRegistration (id, password, updates) {
+        try {
+            // establish db client connection
+            const userOps = await databaseOps(COLLECTION);
+
+            // get update operaton function
+            const { updateResource } = userOps;
+
+            // hash password for storage
+            const hashedPassword = await User.hashPassword(password);
+
+            // commit updates and add in hashed password
+            const numberOfModifiedDocuments = await updateResource(id, [...updates, { field: `account.password`, value: hashedPassword }], false);
+
+            // return the number of documents that were modified, should be one
+            return numberOfModifiedDocuments;
+        } catch (err) {
+            throw new ExpressError(err.message, err.status || 500);
+        }
+    }
+
+    /** Checks database for user associated with given _id, returns object 
+     * with single property: `isUnverifiedUser`. Value of the property with only
+     * be true if the user exists and contains the document field `account.isVerified: false`
+     */
+    static async checkForUnverifiedUser (_id) {
+        try {
+            // connect to database client
+            const userOps = await databaseOps(COLLECTION);
+
+            // get desired operation
+            const { getResource } = userOps;
+
+            const result = await getResource(_id);
+
+            // if contains property and is false 
+            if (result && result.account.isVerified === false) {
+                return {
+                    isUnverifiedUser: true
+                }
+            } else {
+                throw new ExpressError('No Unverified user is associated with this id', 404);                
+            }
+        } catch (err) {
+            throw new ExpressError(err.message, err.status || 500);
+        }
+    }
+
     /** Find and returns an array of all user objects
      * currently in database
     */
